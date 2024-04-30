@@ -1,0 +1,17 @@
+
+
+define module stdio
+
+
+end
+
+
+define module stdio:
+begin
+
+end
+
+
+there should be a way to create arrays of a single type ?
+(let the type be inferred, but make so that so if the coder decide to do something like: int a = 5;
+it works and a can only be integer now)?

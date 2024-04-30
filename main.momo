@@ -1,0 +1,186 @@
+
+/*
+var usr_input = input("Enter input: ")
+
+print("Your input: " + usr_input)
+
+print("Type of your input: " + type(usr_input) + "\n")
+
+
+for(var i = 0; i < 5; i + 1){
+
+   if(i == 2){
+      continue;
+   } else {
+      puts(i);
+
+   }
+
+}
+
+fn add(a, b){
+   return a + b;
+}
+
+
+var count = 0;
+loop{
+
+   if(count > 50){
+      break
+   } else {
+      puts("Hello, Friend");
+      puts("Hello, World!");
+      puts(count);
+   }
+
+
+   count = count + 1;
+}
+
+
+puts(add("Hello, ", "1101010"));
+
+
+
+
+
+
+//var a = "4";
+
+//a += "4";
+
+//puts(a);
+
+
+
+
+
+fn bubble_sort(array, size) {
+   for(var i = 0; i < size; i + 1) {     
+      for(var j = 0; j < size-i-1; j + 1) {     
+         if(array[j] > array[j+1]) {
+            var temp = array[j];
+            array[j] = array[j+1];
+            array[j+1] = temp;
+         }
+      }
+   }
+}
+
+var arr = [6,5,4,5,7,9,1,2,9,7];
+puts("Before bubble_sort: ");
+puts(arr);
+
+bubble_sort(arr, len(arr));
+
+puts("After bubble_sort: ");
+puts(arr);
+
+
+
+var ab = 54000;
+puts(ab);
+
+
+var a = 123.45;
+puts("Parsed number: ");
+puts(a);
+
+
+var count = 0;
+loop{
+
+   if(count > 0){
+      break
+      
+   } else {
+      puts("Hello, Friend");
+      puts("Hello, World!");
+      puts(count);
+   }
+
+   count = count + 1;
+}
+
+
+
+var usr_input = input("Enter input: ");
+
+print("Your input: " + usr_input);
+
+print("Type of your input: " + type(usr_input) + "\n");
+
+
+for(var j = 0; j < 5; j++) {     
+   puts(j);
+}
+
+
+var fl = 5.25;
+var mt = 5.25;
+
+var hs = {"nome":"Fábio"};
+hs["nome"] = "Tânia Aparecida de Souza Rodrigues";
+
+puts(hs["nome"]);
+
+var b = [1,2,3];
+b[0] = "b";
+
+puts(b);
+
+if(5 < 4 && 5 > 3){puts("aa");} 
+
+
+for(var j = 0; j < 5; j++) {     
+   puts(j);
+}
+
+
+typedef Point {// FIX THIS
+   X: 0.0
+   Y: 0.0
+}
+
+Point a = {X:5, Y:5}; // FIX THIS
+
+
+
+//#load "utils.momo";
+#load "math";
+
+//var a = add(5,5);
+//puts(a);
+
+
+//var b = Add(5,5);
+//print(b);
+
+
+var a = {"a":"a", "b":"b", "hash":{"nested":{"very_nested":"VERY NESTED"}}};
+puts((a.hash.nested.very_nested + " ") * 2);
+
+var b = {"add":fn(a,b){return a+b;}};
+
+puts(b.add(5,5));
+
+
+
+#load "math";
+#load "utils.momo";
+#load "utils.momo";
+
+puts(math.PI);
+puts(add(5,5));
+
+s
+typedef Point {
+   X: 0.0asa
+   Y: 0.0
+}asda
+
+//Point a = {X:5, Y:5}; // FIX THIS
+
+
+*/

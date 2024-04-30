@@ -1,0 +1,11 @@
+
+
+FIX THESE
+postfix count++
+prefix --count
+
+
+Finish these 
+Bitwise Operators: &, |, ^, <<, >>, &^
+Assignment Operators:  %=, <<=, >>=, &=, |=, ^=
+

@@ -1,0 +1,36 @@
+{VAR {%!s(int=12) %!s(int=3)} main.momo var} 
+map[!:%!s(Parser.prefixParseFN=0x4a0ea0) (:%!s(Parser.prefixParseFN=0x4a1000) -:%!s(Parser.prefixParseFN=0x4a0ea0) C
+OMMENT:%!s(Parser.prefixParseFN=0x4a1220) FALSE:%!s(Parser.prefixParseFN=0x4a0f00) 
+FOR:%!s(Parser.prefixParseFN=0x4a10c0) FUNCTION:%!s(Parser.prefixParseFN=0x4a1320) 
+IDENTIFIER:%!s(Parser.prefixParseFN=0x4a0de0) IF:%!s(Parser.prefixParseFN=0x4a1060) 
+INT:%!s(Parser.prefixParseFN=0x4a0e40) MULTILINE_COMMENT:%!s(Parser.prefixParseFN=0x4a1120) 
+STRING:%!s(Parser.prefixParseFN=0x4a1380) TRUE:%!s(Parser.prefixParseFN=0x4a0f00) [:%!s(Parser.prefixParseFN=0x4a1480) {:%!s(Parser.prefixParseFN=0x4a1580)] 
+map[!=:%!s(Parser.infixParseFN=0x4a15e0) (:%!s(Parser.infixParseFN=0x4a1660) *:%!s(Parser.infixParseFN=0x4a15e0) 
++:%!s(Parser.infixParseFN=0x4a15e0) -:%!s(Parser.infixParseFN=0x4a15e0) /:%!s(Parser.infixParseFN=0x4a15e0)
+<:%!s(Parser.infixParseFN=0x4a15e0) ==:%!s(Parser.infixParseFN=0x4a15e0) >:%!s(Parser.infixParseFN=0x4a15e0) 
+[:%!s(Parser.infixParseFN=0x4a17a0)] []}]}]}]} Expected semicolon (;) &{%!s(*Lexer.Lexer=&{{21 7} 0xc000034240 main.momo}) {} 
+{%!s(int=20) %!s(int=10)} main.momo }} {} {%!s(int=21) %!s(int=7)} main.momo }} map[!:%!s(Parser.prefixParseFN=0x4a0ea0) 
+(:%!s(Parser.prefixParseFN=0x4a1000) -:%!s(Parser.prefixParseFN=0x4a0ea0) COMMENT:%!s(Parser.prefixParseFN=0x4a1220)
+FALSE:%!s(Parser.prefixParseFN=0x4a0f00) FOR:%!s(Parser.prefixParseFN=0x4a10c0) FUNCTION:%!s(Parser.prefixParseFN=0x4a1320)
+IDENTIFIER:%!s(Parser.prefixParseFN=0x4a0de0) IF:%!s(Parser.prefixParseFN=0x4a1060) INT:%!s(Parser.prefixParseFN=0x4a0e40)
+MULTILINE_COMMENT:%!s(Parser.prefixParseFN=0x4a1120) STRING:%!s(Parser.prefixParseFN=0x4a1380) TRUE:%!s(Parser.prefixParseFN=0x4a0f00)
+[:%!s(Parser.prefixParseFN=0x4a1480) {:%!s(Parser.prefixParseFN=0x4a1580)] map[!=:%!s(Parser.infixParseFN=0x4a15e0) (:%!s(Parser.infixParseFN=0x4a1660) 
+*:%!s(Parser.infixParseFN=0x4a15e0) +:%!s(Parser.infixParseFN=0x4a15e0) -:%!s(Parser.infixParseFN=0x4a15e0) /:%!s(Parser.infixParseFN=0x4a15e0) 
+<:%!s(Parser.infixParseFN=0x4a15e0) ==:%!s(Parser.infixParseFN=0x4a15e0) >:%!s(Parser.infixParseFN=0x4a15e0) [:%!s(Parser.infixParseFN=0x4a17a0)] 
+[Expected semicolon (;) &{%!s(*Lexer.Lexer=&{{12 3} 0xc000034240 main.momo}) {MULTILINE_COMMENT {%!s(int=9) %!s(int=1)} main.momo
+
+var temp = (array[j]);
+(array=(array[(j +1)]))
+(array=temp)
+if((array[j]) >(array[(j +1)])) var temp = (array[j]);(array=(array[(j +1)]))(array=temp)
+forvar j = 0; (j <((size -i) -1)) (j +1) if((array[j]) >(array[(j +1)])) var temp = (array[j]);(array=(array[(j +1)]))(array=temp)
+forvar i = 0; (i <size) (i +1) forvar j = 0; (j <((size -i) -1)) (j +1) if((array[j]) >(array[(j +1)])) var temp = (array[j]);(array=(array[(j +1)]))(array=temp)
+var bubble_sort = fn(array, size) forvar i = 0; (i <size) (i +1) forvar j = 0; (j <((size -i) -1)) (j +1) if((array[j]) >(array[(j +1)])) var temp = (array[j]);(array=(array[(j +1)]))(array=temp);
+var arr = [6, 5, 4, 5, 7, 9, 1, 2, 9, 7];
+puts(Before bubble_sort: )
+puts(arr)
+bubble_sort(arr, len(arr))
+puts(After bubble_sort: )
+puts(arr)
+(b=1)
+

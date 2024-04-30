@@ -1,0 +1,15 @@
+fn add(x,y){
+    return x + y;
+}
+
+
+puts(add(2,2));
+
+
+typedef Point {
+   X: 0.0;
+   Y: 0.0;
+};
+
+Point a = {X:5, Y:5};
+

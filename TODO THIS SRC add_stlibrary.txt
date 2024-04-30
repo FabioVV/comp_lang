@@ -1,0 +1,9 @@
+with functions to get int, string etc
+
+
+
+
+
+PATH
+
+<language-intall-path>/src/pkg/<the-package>

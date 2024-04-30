@@ -1,0 +1,30 @@
+
+Sure! Let's say you have a source file main.c in the directory /home/user/project/ and you want to include a header file named example.h.
+
+If example.h is located in the same directory (/home/user/project/), you would use double quotes in your #include directive like this:
+
+c
+Copy code
+#include "example.h"
+If example.h is located in a system-wide directory or a directory specified in the compiler's search path, you would use angle brackets in your #include directive like this:
+
+c
+Copy code
+#include <example.h>
+Here's how the compiler would search for the file in each case:
+
+Using Double Quotes:
+Compiler looks for example.h in the same directory as main.c, i.e., /home/user/project/.
+If example.h is found in that directory, it is included.
+If not found, the compiler moves to the next step.
+Using Angle Brackets:
+Compiler looks for example.h in the system-wide directories specified in its search path.
+If example.h is found in any of those directories, it is included.
+If not found, the compiler reports an error unless you've configured additional directories to search.
+Remember, the specific directories searched and how to configure additional directories can vary depending on your compiler and development environment.
+
+
+
+
+
+

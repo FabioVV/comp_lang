@@ -1,0 +1,34 @@
+/*
+Maybe you’ve already heard about parser generators, like the tools yacc, bison or ANTLR.
+Parser generators are tools that, when fed with a formal description of a language, produce
+parsers as their output. This output is code that can then be compiled/interpreted and itself
+fed with source code as input to produce a syntax tree.
+There are a lot of parser generators, differing in the format of the input they accept and the
+language of the output they produce. The majority of them use a context-free grammar (CFG)
+as their input. A CFG is a set of rules that describe how to form correct (valid according to
+the syntax) sentences in a language. The most common notational formats of CFGs are the
+Backus-Naur Form (BNF) or the Extended Backus-Naur Form (EBNF).
+
+*/
+
+/*
+Maybe you’ve also heard that you should use a parser generator instead of writing a parser by
+hand. “Just skip this part”, they say, “it’s a solved problem.” The reason for this recommendation is that parsers are exceptionally well suited to being automatically generated. Parsing
+is one of the most well-understood branches of computer science and really smart people have
+already invested a lot of time into the problems of parsing. The results of their work are CFG,
+BNF, EBNF, parser generators and advanced parsing techniques used in them. Why shouldn’t
+you take advantage of that?
+I don’t think that learning to write your own parser is a waste of time. I actually think it’s
+immensely valuable. Only after having written your own parser, or at least attempted to, will
+you see the benefits parser generators provide, the drawbacks they have and the problems they
+solve. For me the concept of a parser generator only “clicked” after I wrote my first parser. I
+looked at it and only then really and truly understood how it’s possible to generate this code
+automatically.
+Most people that recommend using a parser generator, when others want to get started with interpreters and compilers, only do so because they’ve written a parser themselves before. They’ve
+seen the problems and solutions available and decided it’s better to use an existing tool for the
+job. And they’re correct - when you want to get something done and are in a production environment, where correctness and robustness are priorities. Of course you shouldn’t try to write
+your own parser then, especially not if you’ve never written one before.
+But we are here to learn, we want to understand how parsers work. And it’s my opinion that
+the best way to do that is by getting our hands dirty and writing a parser ourselves. Also, I
+think it’s immense fun.
+*/

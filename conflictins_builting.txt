@@ -1,0 +1,8 @@
+
+In cases where you have conflicting function names, such as having both a built-in "add" function and a "add" function from a loaded library, you need to decide on a strategy for handling these conflicts. Here are a few approaches you could consider:
+
+Priority/Override: You could give priority to functions from the loaded library over built-in functions. This means that if a function with the same name exists both in the loaded library and as a built-in, the one from the loaded library would override the built-in. This approach allows users to customize or extend the functionality provided by the language.
+Namespace or Prefix: You could enforce a naming convention or namespace for functions from loaded libraries to avoid conflicts with built-in functions. For example, functions from loaded libraries could be prefixed with the name of the library or placed in a specific namespace.
+Error or Warning: You could generate an error or warning when a function name conflicts with an existing built-in function. This alerts the user to the conflict and prompts them to resolve it by renaming the function or using a different approach.
+Rename on Load: When loading functions from a library, you could automatically rename conflicting functions to avoid name collisions. For example, you could append a suffix or prefix to the function name to make it unique.
+User Resolution: Allow the user to specify how conflicts should be resolved, either through configuration options or by providing explicit instructions in the code.
