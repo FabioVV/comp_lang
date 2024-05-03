@@ -11,6 +11,7 @@ type Opcode byte
 
 const (
 	Opconstant Opcode = iota
+	OpAdd
 )
 
 type Definition struct {
@@ -18,8 +19,14 @@ type Definition struct {
 	OperandWidths []int
 }
 
+/*
+The new opcode is called OpAdd and tells the VM to pop the two topmost elements off the
+stack, add them together and push the result back on to the stack. In contrast to OpConstant,
+it doesn’t have any operands. It’s simply one byte, a single opcode
+*/
 var defs = map[Opcode]*Definition{
 	Opconstant: {"Opconstant", []int{2}},
+	OpAdd:      {"OpAdd", []int{}},
 }
 
 func LookupOp(op byte) (*Definition, error) {
@@ -109,6 +116,8 @@ func (ins Instructions) fmtInstruction(def *Definition, operands []int) string {
 	}
 
 	switch operandCount {
+	case 0:
+		return def.Name
 	case 1:
 		return fmt.Sprintf("%s %d", def.Name, operands[0])
 	}

@@ -3,10 +3,11 @@ package repl
 import (
 	"bufio"
 	"fmt"
-	Evaluator "github/FabioVV/interp_lang/evaluator"
+	"github/FabioVV/interp_lang/compiler"
 	Lexer "github/FabioVV/interp_lang/lexer"
 	Object "github/FabioVV/interp_lang/object"
 	Parser "github/FabioVV/interp_lang/parser"
+	"github/FabioVV/interp_lang/vm"
 	"io"
 	"os"
 	"os/exec"
@@ -53,8 +54,8 @@ func ClearScreen() {
 
 func Start(in io.Reader, out io.Writer) {
 	ClearScreen()
+
 	scanner := bufio.NewScanner(in)
-	env := Object.NewEnviroment()
 
 	user, err := user.Current()
 	username := user.Username
@@ -78,7 +79,7 @@ func Start(in io.Reader, out io.Writer) {
 		username = "Coder"
 	}
 
-	fmt.Printf("{Momo pre-alpha} : {%s} : {%s}\n", currentTime, platform)
+	fmt.Printf("{Momo compiler pre-pre-alpha } : {%s} : {%s}\n", currentTime, platform)
 
 	fmt.Printf("Hello %s \n", username)
 	fmt.Printf("%s\n", message)
@@ -102,15 +103,29 @@ func Start(in io.Reader, out io.Writer) {
 
 		if len(p.Errors()) != 0 {
 			printParseErrors(out, p.Errors())
-			// Here we use continue because we dont want to make the REPL exit when encountering an parser error
+			// continue, we dont want the REPL to exit on error
 			continue
 		}
 
-		evaluated := Evaluator.Eval(program, env)
-		if evaluated != nil {
-			io.WriteString(out, evaluated.Inspect())
-			io.WriteString(out, "\n")
+		comp := compiler.New()
+		err := comp.Compile(program)
+
+		if err != nil {
+			fmt.Fprintf(out, "compilation failed:\n %s\n", err)
+			continue
 		}
+
+		machine := vm.NewVM(comp.Bytecode())
+		err = machine.Run()
+
+		if err != nil {
+			fmt.Fprintf(out, "executing bytecode failed:\n %s\n", err)
+			continue
+		}
+
+		stackTop := machine.StackTop()
+		io.WriteString(out, stackTop.Inspect())
+		io.WriteString(out, "\n")
 
 	}
 }

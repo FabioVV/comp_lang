@@ -41,6 +41,7 @@ func TestIntegerArithmetic(t *testing.T) {
 
 				code.Make(code.Opconstant, 0),
 				code.Make(code.Opconstant, 1),
+				code.Make(code.OpAdd),
 			},
 		},
 	}

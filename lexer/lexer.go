@@ -21,8 +21,7 @@ type Lexer struct {
 
 // Creates our lexer. Initializes the line and column position at 1, our input as a *bufio.Reader and filename
 func New(reader io.Reader, Filename string) *Lexer {
-	l := &Lexer{Input: bufio.NewReader(reader), Pos: h.Position{Line: 1, Column: 1}, Filename: Filename}
-	return l
+	return &Lexer{Input: bufio.NewReader(reader), Pos: h.Position{Line: 1, Column: 1}, Filename: Filename}
 }
 
 func newLexerError(format string, pos h.Position, filename string, a ...interface{}) *Object.Error {
@@ -323,7 +322,7 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 				if peekChar == 'l' {
 					// I just assume its #load
-					if token_name, _ := l.acceptRun("load"); token_name != "" && token_name == "load" {
+					if token_name, _ := l.acceptRun("load"); token_name == "load" {
 
 						tok = Token.Token{Type: Token.LOAD, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: token_name}
 
@@ -584,10 +583,7 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 			l.Pos.Column = 0
 
 		default:
-			if unicode.IsSpace(r) {
-				continue
-
-			} else if unicode.IsLetter(r) {
+			if unicode.IsLetter(r) {
 
 				l.Backup()
 
