@@ -62,12 +62,51 @@ func (c *Compiler) Compile(node Ast.Node) error {
 		}
 
 	case *Ast.ExpressionStatement:
-		err := c.Compile(node.Expression)
-		if err != nil {
+		if err := c.Compile(node.Expression); err != nil {
+			return err
+
+		} else {
+			c.emitInstruction(code.OpPop)
+
+		}
+
+	case *Ast.PrefixExpression:
+		if err := c.Compile(node.Right); err != nil {
 			return err
 		}
 
+		switch node.Operator {
+		case "!":
+			c.emitInstruction(code.OpBang)
+
+		case "-":
+			c.emitInstruction(code.OpMinus)
+
+		default:
+			return fmt.Errorf("unknown operator %s", node.Operator)
+
+		}
+
 	case *Ast.InfixExpression:
+		/*
+			What we did here is to turn < into a special case. We turn the order around and first compile
+			node.Right and then node.Left in case the operator is <. After that we emit the OpGreaterThan
+			opcode. We changed a less-than comparison into a greater-than comparison – while compiling.
+		*/
+		if node.Operator == "<" {
+			err := c.Compile(node.Right)
+			if err != nil {
+				return err
+			}
+
+			err = c.Compile(node.Left)
+			if err != nil {
+				return err
+			}
+			c.emitInstruction(code.OpGreaterThan)
+			return nil
+		}
+
 		err := c.Compile(node.Left)
 		if err != nil {
 			return err
@@ -81,13 +120,42 @@ func (c *Compiler) Compile(node Ast.Node) error {
 		switch node.Operator {
 		case "+":
 			c.emitInstruction(code.OpAdd)
+
+		case "-":
+			c.emitInstruction(code.OpSub)
+
+		case "*":
+			c.emitInstruction(code.OpMul)
+
+		case "/":
+			c.emitInstruction(code.OpDiv)
+
+		case ">":
+			c.emitInstruction(code.OpGreaterThan)
+
+		case "==":
+			c.emitInstruction(code.OpEqual)
+
+		case "!=":
+			c.emitInstruction(code.OpNotEqual)
+
 		default:
 			return fmt.Errorf("unknow operator %s", node.Operator)
+
 		}
 
 	case *Ast.IntegerLiteral:
 		integer := &Object.Integer{Value: node.Value}
 		c.emitInstruction(code.Opconstant, c.addConstant(integer))
+
+	case *Ast.Boolean:
+		if node.Value {
+			c.emitInstruction(code.OpTrue)
+
+		} else {
+			c.emitInstruction(code.OpFalse)
+
+		}
 
 	}
 

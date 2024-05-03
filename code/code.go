@@ -12,6 +12,27 @@ type Opcode byte
 const (
 	Opconstant Opcode = iota
 	OpAdd
+	// pop the topmost element off the stack
+	OpPop
+	// subtraction
+	OpSub
+	// multiplication
+	OpMul
+	// division
+	OpDiv
+
+	// true and false literals
+	OpTrue
+	OpFalse
+
+	// comparison operators
+	OpEqual
+	OpNotEqual
+	OpGreaterThan
+
+	// prefix operators
+	OpMinus
+	OpBang
 )
 
 type Definition struct {
@@ -24,9 +45,31 @@ The new opcode is called OpAdd and tells the VM to pop the two topmost elements 
 stack, add them together and push the result back on to the stack. In contrast to OpConstant,
 it doesn’t have any operands. It’s simply one byte, a single opcode
 */
+
+/*
+You might be wondering why there is no opcode for <. If we have OpGreaterThan, shouldn’t we
+have an OpLessThan, too? That’s a valid question, because we could add OpLessThan and that
+would be fine, but I want to show something that’s possible with compilation and not with
+interpretation: reordering of code.
+The expression 3 < 5 can be reordered to 5 > 3 without changing its result. And because it can
+be reordered, that’s what our compiler is going to do. It will take every less-than expression
+and reorder it to emit the greater-than version instead. That way we keep the instruction set
+small, the loop of our VM tighter and learn about the things we can do with compilation
+*/
 var defs = map[Opcode]*Definition{
-	Opconstant: {"Opconstant", []int{2}},
-	OpAdd:      {"OpAdd", []int{}},
+	Opconstant:    {"Opconstant", []int{2}},
+	OpAdd:         {"OpAdd", []int{}},
+	OpPop:         {"OpPop", []int{}},
+	OpSub:         {"OpSub", []int{}},
+	OpMul:         {"OpMul", []int{}},
+	OpDiv:         {"OpDiv", []int{}},
+	OpTrue:        {"OpTrue", []int{}},
+	OpFalse:       {"OpFalse", []int{}},
+	OpEqual:       {"OpEqual", []int{}},
+	OpNotEqual:    {"OpNotEqual", []int{}},
+	OpGreaterThan: {"OpGreaterThan", []int{}},
+	OpMinus:       {"OpMinus", []int{}},
+	OpBang:        {"OpBang", []int{}},
 }
 
 func LookupOp(op byte) (*Definition, error) {
