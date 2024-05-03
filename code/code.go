@@ -33,6 +33,10 @@ const (
 	// prefix operators
 	OpMinus
 	OpBang
+
+	// Conditional jumping
+	OpJumpNotTruthy
+	OpJump
 )
 
 type Definition struct {
@@ -57,19 +61,21 @@ and reorder it to emit the greater-than version instead. That way we keep the in
 small, the loop of our VM tighter and learn about the things we can do with compilation
 */
 var defs = map[Opcode]*Definition{
-	Opconstant:    {"Opconstant", []int{2}},
-	OpAdd:         {"OpAdd", []int{}},
-	OpPop:         {"OpPop", []int{}},
-	OpSub:         {"OpSub", []int{}},
-	OpMul:         {"OpMul", []int{}},
-	OpDiv:         {"OpDiv", []int{}},
-	OpTrue:        {"OpTrue", []int{}},
-	OpFalse:       {"OpFalse", []int{}},
-	OpEqual:       {"OpEqual", []int{}},
-	OpNotEqual:    {"OpNotEqual", []int{}},
-	OpGreaterThan: {"OpGreaterThan", []int{}},
-	OpMinus:       {"OpMinus", []int{}},
-	OpBang:        {"OpBang", []int{}},
+	Opconstant:      {"Opconstant", []int{2}},
+	OpJump:          {"OpBang", []int{2}},
+	OpJumpNotTruthy: {"OpBang", []int{2}},
+	OpAdd:           {"OpAdd", []int{}},
+	OpPop:           {"OpPop", []int{}},
+	OpSub:           {"OpSub", []int{}},
+	OpMul:           {"OpMul", []int{}},
+	OpDiv:           {"OpDiv", []int{}},
+	OpTrue:          {"OpTrue", []int{}},
+	OpFalse:         {"OpFalse", []int{}},
+	OpEqual:         {"OpEqual", []int{}},
+	OpNotEqual:      {"OpNotEqual", []int{}},
+	OpGreaterThan:   {"OpGreaterThan", []int{}},
+	OpMinus:         {"OpMinus", []int{}},
+	OpBang:          {"OpBang", []int{}},
 }
 
 func LookupOp(op byte) (*Definition, error) {
