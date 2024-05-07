@@ -219,7 +219,7 @@ func (l *Lexer) skipWhitespace() {
 }
 
 // This functions receives a string of valid digits and then reads the next token, if the token is present in the set, returns it
-func (l *Lexer) accept(valid string) (string, error) {
+func (l *Lexer) accept(valid string) string {
 
 	var literal string
 
@@ -227,7 +227,7 @@ func (l *Lexer) accept(valid string) (string, error) {
 
 	if err != nil {
 		if err == io.EOF {
-			return literal, nil
+			return literal
 		}
 	}
 
@@ -235,25 +235,25 @@ func (l *Lexer) accept(valid string) (string, error) {
 
 	if strings.IndexRune(valid, r) >= 0 {
 		literal += string(r)
-		return literal, nil
+		return literal
 
 	} else {
 		l.Backup()
 	}
 
-	return "", nil
+	return ""
 }
 
 // This functions receives a string of valid digits and then keeps consuming runes if they they are present in the valid set
 // EX: l.acceptRun("0123456789") -> if called, it's going to keep reading the next runes until one that is not in the 0-9 is read
-func (l *Lexer) acceptRun(valid string) (string, error) {
+func (l *Lexer) acceptRun(valid string) string {
 	var literal string
 
 	for {
 		r, _, err := l.Input.ReadRune()
 		if err != nil {
 			if err == io.EOF {
-				return literal, nil
+				return literal
 			}
 		}
 
@@ -267,7 +267,7 @@ func (l *Lexer) acceptRun(valid string) (string, error) {
 		}
 	}
 
-	return literal, nil
+	return literal
 }
 
 // Peaks the next rune and returns a bool indicating if it is a letter or number
@@ -322,7 +322,7 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 				if peekChar == 'l' {
 					// I just assume its #load
-					if token_name, _ := l.acceptRun("load"); token_name == "load" {
+					if token_name := l.acceptRun("load"); token_name == "load" {
 
 						tok = Token.Token{Type: Token.LOAD, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: token_name}
 
@@ -605,43 +605,34 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 				digits := "0123456789"
 
-				if digit, _ := l.accept("0"); digit != "" {
-					literal += digit
-				}
+				literal += l.accept("0")
 
-				if hexDigit, _ := l.accept("xX"); hexDigit != "" {
+				if hexDigit := l.accept("xX"); hexDigit != "" {
 					digits = "0123456789abcdefABCDEF"
 					literal += hexDigit
 				}
 
-				if nums, _ := l.acceptRun(digits); nums != "" {
-					literal += nums
-				}
+				literal += l.acceptRun(digits)
 
-				if period, _ := l.accept("."); period != "" {
+				if period := l.accept("."); period != "" {
 					literal += period
 				}
 
-				if nums_f, _ := l.acceptRun(digits); nums_f != "" {
-					literal += nums_f
-				}
+				literal += l.acceptRun(digits)
 
-				if exponent, _ := l.accept("eE"); exponent != "" {
+				if exponent := l.accept("eE"); exponent != "" {
 					literal += exponent
 
-					if sign, _ := l.accept("+-"); sign != "" {
+					if sign := l.accept("+-"); sign != "" {
 						literal += sign
 					}
 
-					if exponentLiteral, err := l.acceptRun("0123456789"); err == nil {
-						literal += exponentLiteral
-					}
+					literal += l.acceptRun("0123456789")
+
 				}
 
 				// Is it imaginary?
-				if imaginary, err := l.accept("i"); err != nil && imaginary != "" {
-					literal += imaginary
-				}
+				literal += l.accept("i")
 
 				// This is the maximum length we can go and stil be a number,
 				// If there is any alphanumeric chars after this then its an error

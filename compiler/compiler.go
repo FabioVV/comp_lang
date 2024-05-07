@@ -148,6 +148,10 @@ func (c *Compiler) Compile(node Ast.Node) error {
 		integer := &Object.Integer{Value: node.Value}
 		c.emitInstruction(code.Opconstant, c.addConstant(integer))
 
+	case *Ast.FloatLiteral:
+		float := &Object.Float{Value: node.Value}
+		c.emitInstruction(code.Opconstant, c.addConstant(float))
+
 	case *Ast.Boolean:
 		if node.Value {
 			c.emitInstruction(code.OpTrue)
