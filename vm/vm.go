@@ -12,6 +12,9 @@ const STACKSIZE int = 2048
 var True = &Object.Boolean{Value: true}
 var False = &Object.Boolean{Value: false}
 
+// var Null = &object.Null{} could be this
+var Null = &Object.NULL
+
 // The momo virtual machine. Hell yeah.
 type VM struct {
 	instructions code.Instructions
@@ -149,6 +152,9 @@ func (vm *VM) execBangOperator() error {
 	operand := vm.pop()
 
 	switch operand {
+	case Null:
+		return vm.push(True)
+
 	case True:
 		return vm.push(False)
 
@@ -171,6 +177,19 @@ func (vm *VM) execMinusOperator() error {
 	val := operand.(*Object.Integer).Value
 	return vm.push(&Object.Integer{Value: -val})
 
+}
+
+func isTruthy(obj Object.Object) bool {
+	switch obj := obj.(type) {
+	case *Object.Boolean:
+		return obj.Value
+
+	case *Object.Null:
+		return false
+
+	default:
+		return true
+	}
 }
 
 // Turns on momo's virtual machine
@@ -228,6 +247,28 @@ func (vm *VM) Run() error {
 			if err := vm.execMinusOperator(); err != nil {
 				return err
 			}
+
+		case code.OpJumpNotTruthy:
+			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
+			// After that we manually
+			// increase ip by two so we correctly skip over the two bytes of the operand in the next cycle.
+			ip += 2
+
+			condition := vm.pop()
+			if !isTruthy(condition) {
+				ip = pos - 1
+			}
+
+		case code.OpJump:
+			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
+			ip = pos - 1
+
+		case code.OpNull:
+			err := vm.push(Null)
+			if err != nil {
+				return err
+			}
+
 		}
 	}
 

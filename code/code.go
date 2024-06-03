@@ -37,6 +37,9 @@ const (
 	// Conditional jumping
 	OpJumpNotTruthy
 	OpJump
+
+	//Null
+	OpNull
 )
 
 type Definition struct {
@@ -76,6 +79,7 @@ var defs = map[Opcode]*Definition{
 	OpGreaterThan:   {"OpGreaterThan", []int{}},
 	OpMinus:         {"OpMinus", []int{}},
 	OpBang:          {"OpBang", []int{}},
+	OpNull:          {"OpNull", []int{}},
 }
 
 func LookupOp(op byte) (*Definition, error) {
@@ -88,6 +92,7 @@ func LookupOp(op byte) (*Definition, error) {
 
 }
 
+// Decodes the operands
 func ReadUint16(ins Instructions) uint16 {
 	return binary.BigEndian.Uint16(ins)
 }

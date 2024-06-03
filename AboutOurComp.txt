@@ -1,0 +1,2 @@
+This is called back-patching and common in compiler’s such as ours, that only traverse the AST
+once and are thus called single-pass compilers
