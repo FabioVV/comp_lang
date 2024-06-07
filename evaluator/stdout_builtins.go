@@ -2,30 +2,30 @@ package Evaluator
 
 import (
 	"fmt"
-	Object "github/FabioVV/interp_lang/object"
-	Token "github/FabioVV/interp_lang/token"
+	object "github/FabioVV/comp_lang/object"
+	token "github/FabioVV/comp_lang/token"
 )
 
-var stdout_builtins = map[string]*Object.Builtin{
+var stdout_builtins = map[string]*object.Builtin{
 	/*
 		Functions for OUTPUT
 	*/
 	"puts": {
-		Fn: func(token Token.Token, args ...Object.Object) Object.Object {
+		Fn: func(token token.Token, args ...object.Object) object.Object {
 			for _, arg := range args {
 				fmt.Println(arg.Inspect())
 			}
 
-			return &Object.NULL
+			return &object.NULL
 		},
 	},
 	"print": {
-		Fn: func(token Token.Token, args ...Object.Object) Object.Object {
+		Fn: func(token token.Token, args ...object.Object) object.Object {
 			for _, arg := range args {
 				fmt.Print(arg.Inspect())
 			}
 
-			return &Object.NULL
+			return &object.NULL
 		},
 	},
 }

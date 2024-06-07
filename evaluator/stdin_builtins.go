@@ -3,8 +3,8 @@ package Evaluator
 import (
 	"bufio"
 	"fmt"
-	Object "github/FabioVV/interp_lang/object"
-	Token "github/FabioVV/interp_lang/token"
+	Object "github/FabioVV/comp_lang/object"
+	Token "github/FabioVV/comp_lang/token"
 	"os"
 )
 

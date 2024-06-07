@@ -1,6 +1,6 @@
 package Token
 
-import h "github/FabioVV/interp_lang/syshelpers"
+import h "github/FabioVV/comp_lang/syshelpers"
 
 /*
 We defined the TokenType type to be a string. That allows us to use many different values

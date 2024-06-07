@@ -40,6 +40,10 @@ const (
 
 	//Null
 	OpNull
+
+	// Value binding to names A.K.A variables
+	OpGetGlobal
+	OpSetGlobal
 )
 
 type Definition struct {
@@ -80,6 +84,8 @@ var defs = map[Opcode]*Definition{
 	OpMinus:         {"OpMinus", []int{}},
 	OpBang:          {"OpBang", []int{}},
 	OpNull:          {"OpNull", []int{}},
+	OpGetGlobal:     {"OpSetGlobal", []int{2}},
+	OpSetGlobal:     {"OpSetGlobal", []int{2}},
 }
 
 func LookupOp(op byte) (*Definition, error) {

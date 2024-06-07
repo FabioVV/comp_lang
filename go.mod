@@ -1,3 +1,3 @@
-module github/FabioVV/interp_lang
+module github/FabioVV/comp_lang
 
 go 1.21.6

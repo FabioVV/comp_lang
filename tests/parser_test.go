@@ -2,10 +2,10 @@ package Tests
 
 import (
 	"fmt"
-	Ast "github/FabioVV/interp_lang/ast"
-	Lexer "github/FabioVV/interp_lang/lexer"
-	Object "github/FabioVV/interp_lang/object"
-	Parser "github/FabioVV/interp_lang/parser"
+	Ast "github/FabioVV/comp_lang/ast"
+	Lexer "github/FabioVV/comp_lang/lexer"
+	Object "github/FabioVV/comp_lang/object"
+	Parser "github/FabioVV/comp_lang/parser"
 	"strings"
 	"testing"
 )

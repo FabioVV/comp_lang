@@ -2,12 +2,9 @@ package Evaluator
 
 import (
 	"fmt"
-	Ast "github/FabioVV/interp_lang/ast"
-	Lexer "github/FabioVV/interp_lang/lexer"
-	math "github/FabioVV/interp_lang/lib/math"
-	Object "github/FabioVV/interp_lang/object"
-	Parser "github/FabioVV/interp_lang/parser"
-	Token "github/FabioVV/interp_lang/token"
+	Ast "github/FabioVV/comp_lang/ast"
+	Object "github/FabioVV/comp_lang/object"
+	Token "github/FabioVV/comp_lang/token"
 	"io"
 	"os"
 	"path/filepath"
@@ -34,7 +31,7 @@ func (it *IncludeTracker) MarkIncluded(filename string) {
 }
 
 var libraries = map[string]map[string]*Object.Lib{
-	"math": math.Math,
+	// "math": math.Math,
 	// Add other libraries here...
 }
 
@@ -863,20 +860,20 @@ func evalLoadStatement(node *Ast.LoadExpression, env *Object.Enviroment) Object.
 
 			defer file.Close()
 
-			l := Lexer.New(file, path)
-			p := Parser.New(l)
-			program := p.ParseProgram()
+			// l := Lexer.New(file, path)
+			// p := Parser.New(l)
+			// program := p.ParseProgram()
 
-			if len(p.Errors()) != 0 {
-				printParseErrors(os.Stdout, p.Errors())
-				return nil
-			}
+			// if len(p.Errors()) != 0 {
+			// 	printParseErrors(os.Stdout, p.Errors())
+			// 	return nil
+			// }
 
-			evaluated := Eval(program, env)
-			if evaluated != nil && evaluated.Inspect() != "null" {
-				io.WriteString(os.Stdout, evaluated.Inspect())
-				io.WriteString(os.Stdout, "\n")
-			}
+			// evaluated := Eval(program, env)
+			// if evaluated != nil && evaluated.Inspect() != "null" {
+			// 	io.WriteString(os.Stdout, evaluated.Inspect())
+			// 	io.WriteString(os.Stdout, "\n")
+			// }
 
 		} else {
 

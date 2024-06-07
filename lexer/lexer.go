@@ -3,9 +3,9 @@ package Lexer
 import (
 	"bufio"
 	"fmt"
-	Object "github/FabioVV/interp_lang/object"
-	h "github/FabioVV/interp_lang/syshelpers"
-	Token "github/FabioVV/interp_lang/token"
+	Object "github/FabioVV/comp_lang/object"
+	h "github/FabioVV/comp_lang/syshelpers"
+	Token "github/FabioVV/comp_lang/token"
 	"io"
 	"strings"
 	"unicode"

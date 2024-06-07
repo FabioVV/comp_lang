@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	Evaluator "github/FabioVV/interp_lang/evaluator"
-	Lexer "github/FabioVV/interp_lang/lexer"
-	Object "github/FabioVV/interp_lang/object"
-	Parser "github/FabioVV/interp_lang/parser"
-	Repl "github/FabioVV/interp_lang/repl"
+	Evaluator "github/FabioVV/comp_lang/evaluator"
+	Lexer "github/FabioVV/comp_lang/lexer"
+	Object "github/FabioVV/comp_lang/object"
+	Parser "github/FabioVV/comp_lang/parser"
+	Repl "github/FabioVV/comp_lang/repl"
 	"io"
 	"os"
 	"path/filepath"

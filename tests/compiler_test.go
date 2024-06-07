@@ -2,12 +2,12 @@ package Tests
 
 import (
 	"fmt"
-	Ast "github/FabioVV/interp_lang/ast"
-	"github/FabioVV/interp_lang/code"
-	Compiler "github/FabioVV/interp_lang/compiler"
-	Lexer "github/FabioVV/interp_lang/lexer"
-	Object "github/FabioVV/interp_lang/object"
-	Parser "github/FabioVV/interp_lang/parser"
+	Ast "github/FabioVV/comp_lang/ast"
+	"github/FabioVV/comp_lang/code"
+	Compiler "github/FabioVV/comp_lang/compiler"
+	Lexer "github/FabioVV/comp_lang/lexer"
+	Object "github/FabioVV/comp_lang/object"
+	Parser "github/FabioVV/comp_lang/parser"
 	"strings"
 	"testing"
 )

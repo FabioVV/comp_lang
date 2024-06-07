@@ -2,10 +2,9 @@ package compiler
 
 import (
 	"fmt"
-	Ast "github/FabioVV/interp_lang/ast"
-	"github/FabioVV/interp_lang/code"
-	Code "github/FabioVV/interp_lang/code"
-	Object "github/FabioVV/interp_lang/object"
+	ast "github/FabioVV/comp_lang/ast"
+	"github/FabioVV/comp_lang/code"
+	object "github/FabioVV/comp_lang/object"
 )
 
 type EmittedInstruction struct {
@@ -14,27 +13,36 @@ type EmittedInstruction struct {
 }
 
 type Compiler struct {
-	instructions Code.Instructions
-	constants    []Object.Object
+	instructions code.Instructions
+	constants    []object.Object
+	symbolTable  *SymbolTable
 
 	LastInstruction     EmittedInstruction
 	PreviousInstruction EmittedInstruction
 }
 
 type Bytecode struct {
-	Instructions Code.Instructions
-	Constants    []Object.Object
+	Instructions code.Instructions
+	Constants    []object.Object
 }
 
 func New() *Compiler {
 	return &Compiler{
-		instructions: Code.Instructions{},
-		constants:    []Object.Object{},
+		instructions: code.Instructions{},
+		constants:    []object.Object{},
+		symbolTable:  NewSymbolTable(),
 	}
 }
 
+func NewWithState(s *SymbolTable, constants []object.Object) *Compiler {
+	compiler := New()
+	compiler.symbolTable = s
+	compiler.constants = constants
+	return compiler
+}
+
 // Add constant to the constants pool and return its index (position in the pool)
-func (c *Compiler) addConstant(obj Object.Object) int {
+func (c *Compiler) addConstant(obj object.Object) int {
 	c.constants = append(c.constants, obj)
 	return len(c.constants) - 1
 }
@@ -90,10 +98,10 @@ func (c *Compiler) changeOperand(opPos int, operand int) {
 	c.replaceInstruction(opPos, newInstruction)
 }
 
-func (c *Compiler) Compile(node Ast.Node) error {
+func (c *Compiler) Compile(node ast.Node) error {
 	switch node := node.(type) {
 
-	case *Ast.Program:
+	case *ast.Program:
 		for _, s := range node.Statements {
 			err := c.Compile(s)
 
@@ -102,7 +110,24 @@ func (c *Compiler) Compile(node Ast.Node) error {
 			}
 		}
 
-	case *Ast.ExpressionStatement:
+	case *ast.VarStatement:
+		err := c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+		symbol := c.symbolTable.Define(node.Name.Value)
+		c.emitInstruction(code.OpSetGlobal, symbol.Index)
+
+	case *ast.Identifier:
+		symbol, ok := c.symbolTable.Resolve(node.Value)
+		if !ok {
+			// Compile time error! Very cool.
+			return fmt.Errorf("undefined variable %s", node.Value)
+		}
+
+		c.emitInstruction(code.OpGetGlobal, symbol.Index)
+
+	case *ast.ExpressionStatement:
 		if err := c.Compile(node.Expression); err != nil {
 			return err
 
@@ -111,7 +136,7 @@ func (c *Compiler) Compile(node Ast.Node) error {
 
 		}
 
-	case *Ast.PrefixExpression:
+	case *ast.PrefixExpression:
 		if err := c.Compile(node.Right); err != nil {
 			return err
 		}
@@ -128,7 +153,7 @@ func (c *Compiler) Compile(node Ast.Node) error {
 
 		}
 
-	case *Ast.InfixExpression:
+	case *ast.InfixExpression:
 		/*
 			What we did here is to turn < into a special case. We turn the order around and first compile
 			node.Right and then node.Left in case the operator is <. After that we emit the OpGreaterThan
@@ -185,7 +210,7 @@ func (c *Compiler) Compile(node Ast.Node) error {
 
 		}
 
-	case *Ast.BlockStatement:
+	case *ast.BlockStatement:
 		for _, s := range node.Statements {
 			err := c.Compile(s)
 			if err != nil {
@@ -193,7 +218,7 @@ func (c *Compiler) Compile(node Ast.Node) error {
 			}
 		}
 
-	case *Ast.IFexpression:
+	case *ast.IFexpression:
 
 		err := c.Compile(node.Condition)
 		if err != nil {
@@ -234,15 +259,19 @@ func (c *Compiler) Compile(node Ast.Node) error {
 		afterAlternativePos := len(c.instructions)
 		c.changeOperand(jumpPos, afterAlternativePos)
 
-	case *Ast.IntegerLiteral:
-		integer := &Object.Integer{Value: node.Value}
+	case *ast.IntegerLiteral:
+		integer := &object.Integer{Value: node.Value}
 		c.emitInstruction(code.Opconstant, c.addConstant(integer))
 
-	case *Ast.FloatLiteral:
-		float := &Object.Float{Value: node.Value}
+	case *ast.FloatLiteral:
+		float := &object.Float{Value: node.Value}
 		c.emitInstruction(code.Opconstant, c.addConstant(float))
 
-	case *Ast.Boolean:
+	case *ast.StringLiteral:
+		str := &object.String{Value: node.Value}
+		c.emitInstruction(code.Opconstant, c.addConstant(str))
+
+	case *ast.Boolean:
 		if node.Value {
 			c.emitInstruction(code.OpTrue)
 

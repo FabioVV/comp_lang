@@ -3,11 +3,11 @@ package repl
 import (
 	"bufio"
 	"fmt"
-	"github/FabioVV/interp_lang/compiler"
-	Lexer "github/FabioVV/interp_lang/lexer"
-	Object "github/FabioVV/interp_lang/object"
-	Parser "github/FabioVV/interp_lang/parser"
-	"github/FabioVV/interp_lang/vm"
+	"github/FabioVV/comp_lang/compiler"
+	Lexer "github/FabioVV/comp_lang/lexer"
+	Object "github/FabioVV/comp_lang/object"
+	Parser "github/FabioVV/comp_lang/parser"
+	"github/FabioVV/comp_lang/vm"
 	"io"
 	"os"
 	"os/exec"
@@ -86,6 +86,10 @@ func Start(in io.Reader, out io.Writer) {
 
 	fmt.Printf("Feel free to type in commands\n")
 
+	constants := []Object.Object{}
+	globals := make([]Object.Object, vm.GlobalsSize)
+	symbolTable := compiler.NewSymbolTable()
+
 	for {
 		fmt.Fprintf(out, PROMPT)
 		scanned := scanner.Scan()
@@ -107,7 +111,7 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		comp := compiler.New()
+		comp := compiler.NewWithState(symbolTable, constants)
 		err := comp.Compile(program)
 
 		if err != nil {
@@ -115,7 +119,10 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		machine := vm.NewVM(comp.Bytecode())
+		code := comp.Bytecode()
+		constants = code.Constants
+
+		machine := vm.NewWithGlobalsStore(code, globals)
 		err = machine.Run()
 
 		if err != nil {

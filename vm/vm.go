@@ -2,12 +2,13 @@ package vm
 
 import (
 	"fmt"
-	"github/FabioVV/interp_lang/code"
-	"github/FabioVV/interp_lang/compiler"
-	Object "github/FabioVV/interp_lang/object"
+	"github/FabioVV/comp_lang/code"
+	"github/FabioVV/comp_lang/compiler"
+	Object "github/FabioVV/comp_lang/object"
 )
 
 const STACKSIZE int = 2048
+const GlobalsSize int = 65536
 
 var True = &Object.Boolean{Value: true}
 var False = &Object.Boolean{Value: false}
@@ -23,6 +24,7 @@ type VM struct {
 	stack []Object.Object
 	sp    int // stackpointer. Always points to the next value. Top of stack is stack[sp-1]
 
+	globals []Object.Object
 }
 
 func NewVM(bytecode *compiler.Bytecode) *VM {
@@ -31,7 +33,14 @@ func NewVM(bytecode *compiler.Bytecode) *VM {
 		constants:    bytecode.Constants,
 		stack:        make([]Object.Object, STACKSIZE),
 		sp:           0,
+		globals:      make([]Object.Object, GlobalsSize),
 	}
+}
+
+func NewWithGlobalsStore(bytecode *compiler.Bytecode, s []Object.Object) *VM {
+	vm := NewVM(bytecode)
+	vm.globals = s
+	return vm
 }
 
 /*
@@ -90,6 +99,18 @@ func (vm *VM) execBinaryIntOp(op code.Opcode, left Object.Object, right Object.O
 	}
 }
 
+func (vm *VM) execBinaryStrOp(op code.Opcode, left Object.Object, right Object.Object) error {
+	if op != code.OpAdd {
+		return fmt.Errorf("unknow string operator : %d", op)
+	}
+
+	leftValue := left.(*Object.String).Value
+	rightValue := right.(*Object.String).Value
+
+	return vm.push(&Object.String{Value: leftValue + rightValue})
+
+}
+
 func (vm *VM) execBinaryOp(op code.Opcode) error {
 	right := vm.pop()
 	left := vm.pop()
@@ -97,11 +118,18 @@ func (vm *VM) execBinaryOp(op code.Opcode) error {
 	rightType := right.Type()
 	LeftType := left.Type()
 
-	if LeftType == Object.INTEGER_OBJ && rightType == Object.INTEGER_OBJ {
+	switch {
+	case LeftType == Object.INTEGER_OBJ && rightType == Object.INTEGER_OBJ:
 		return vm.execBinaryIntOp(op, left, right)
+
+	case LeftType == Object.STRING_OBJ && rightType == Object.STRING_OBJ:
+		return vm.execBinaryStrOp(op, left, right)
+
+	default:
+		return fmt.Errorf("unsupported typs for binary op -> %s %s", LeftType, rightType)
+
 	}
 
-	return fmt.Errorf("unsupported typs for binary op -> %s %s", LeftType, rightType)
 }
 
 func nativeBoolToBooleanObj(input bool) *Object.Boolean {
@@ -262,6 +290,21 @@ func (vm *VM) Run() error {
 		case code.OpJump:
 			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
 			ip = pos - 1
+
+		case code.OpGetGlobal:
+			globalIndex := code.ReadUint16(vm.instructions[ip+1:])
+			ip += 2
+
+			err := vm.push(vm.globals[globalIndex])
+
+			if err != nil {
+				return err
+			}
+
+		case code.OpSetGlobal:
+			globalIndex := code.ReadUint16(vm.instructions[ip+1:])
+			ip += 2
+			vm.globals[globalIndex] = vm.pop()
 
 		case code.OpNull:
 			err := vm.push(Null)

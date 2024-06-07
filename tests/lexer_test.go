@@ -1,8 +1,8 @@
 package Tests
 
 import (
-	Lexer "github/FabioVV/interp_lang/lexer"
-	Token "github/FabioVV/interp_lang/token"
+	Lexer "github/FabioVV/comp_lang/lexer"
+	Token "github/FabioVV/comp_lang/token"
 	"strings"
 	"testing"
 )

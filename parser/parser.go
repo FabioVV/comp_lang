@@ -2,11 +2,11 @@ package Parser
 
 import (
 	"fmt"
-	Ast "github/FabioVV/interp_lang/ast"
-	Lexer "github/FabioVV/interp_lang/lexer"
-	Object "github/FabioVV/interp_lang/object"
-	h "github/FabioVV/interp_lang/syshelpers"
-	Token "github/FabioVV/interp_lang/token"
+	Ast "github/FabioVV/comp_lang/ast"
+	Lexer "github/FabioVV/comp_lang/lexer"
+	Object "github/FabioVV/comp_lang/object"
+	h "github/FabioVV/comp_lang/syshelpers"
+	Token "github/FabioVV/comp_lang/token"
 	"strconv"
 )
 

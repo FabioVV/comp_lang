@@ -1,7 +1,7 @@
 package math
 
 import (
-	Object "github/FabioVV/interp_lang/object"
+	Object "github/FabioVV/comp_lang/object"
 )
 
 var Math = map[string]*Object.Lib{

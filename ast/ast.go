@@ -2,7 +2,7 @@ package Ast
 
 import (
 	"bytes"
-	Token "github/FabioVV/interp_lang/token"
+	Token "github/FabioVV/comp_lang/token"
 	"strings"
 )
 

@@ -1,8 +1,8 @@
 package Evaluator
 
 import (
-	Object "github/FabioVV/interp_lang/object"
-	Token "github/FabioVV/interp_lang/token"
+	Object "github/FabioVV/comp_lang/object"
+	Token "github/FabioVV/comp_lang/token"
 )
 
 // These are more general builtins that may have more than one use

@@ -1,8 +1,8 @@
 package Tests
 
 import (
-	Ast "github/FabioVV/interp_lang/ast"
-	Token "github/FabioVV/interp_lang/token"
+	Ast "github/FabioVV/comp_lang/ast"
+	Token "github/FabioVV/comp_lang/token"
 	"testing"
 )
 
