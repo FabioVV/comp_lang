@@ -13,18 +13,19 @@ const GlobalsSize int = 65536
 var True = &Object.Boolean{Value: true}
 var False = &Object.Boolean{Value: false}
 
-// var Null = &object.Null{} could be this
+// var Null = &object.Null{}
 var Null = &Object.NULL
 
 // The momo virtual machine. Hell yeah.
 type VM struct {
 	instructions code.Instructions
-	constants    []Object.Object
 
-	stack []Object.Object
-	sp    int // stackpointer. Always points to the next value. Top of stack is stack[sp-1]
+	constants []Object.Object
+	globals   []Object.Object
+	stack     []Object.Object
 
-	globals []Object.Object
+	sp int // stackpointer. Always points to the next value. Top of stack is stack[sp-1]
+
 }
 
 func NewVM(bytecode *compiler.Bytecode) *VM {
@@ -51,6 +52,7 @@ func NewWithGlobalsStore(bytecode *compiler.Bytecode, s []Object.Object) *VM {
 		return vm.stack[vm.sp-1]
 	}
 */
+
 func (vm *VM) LastPoppedStackElement() Object.Object {
 	return vm.stack[vm.sp]
 }
@@ -220,6 +222,38 @@ func isTruthy(obj Object.Object) bool {
 	}
 }
 
+func (vm *VM) buildArray(startIndex int, endIndex int) Object.Object {
+	elements := make([]Object.Object, endIndex-startIndex)
+
+	for i := startIndex; i < endIndex; i++ {
+		elements[i-startIndex] = vm.stack[i]
+
+	}
+
+	return &Object.Array{Elements: elements}
+}
+
+func (vm *VM) buildHash(startIndex int, endIndex int) (Object.Object, error) {
+	hashedPairs := make(map[Object.HashKey]Object.HashPair)
+
+	for i := startIndex; i < endIndex; i += 2 {
+		key := vm.stack[i]
+		value := vm.stack[i+1]
+
+		pair := Object.HashPair{Key: key, Value: value}
+
+		hashKey, ok := key.(Object.Hashable)
+
+		if !ok {
+			return nil, fmt.Errorf("unusable as hash key : %s", key.Type())
+		}
+
+		hashedPairs[hashKey.HashKey()] = pair
+	}
+
+	return &Object.Hash{Pairs: hashedPairs}, nil
+}
+
 // Turns on momo's virtual machine
 func (vm *VM) Run() error {
 
@@ -309,6 +343,32 @@ func (vm *VM) Run() error {
 		case code.OpNull:
 			err := vm.push(Null)
 			if err != nil {
+				return err
+			}
+
+		case code.OpArray:
+			numElements := int(code.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+
+			array := vm.buildArray(vm.sp-numElements, vm.sp)
+			vm.sp = vm.sp - numElements
+
+			if err := vm.push(array); err != nil {
+				return err
+			}
+
+		case code.OpHash:
+			numElements := int(code.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+
+			hash, err := vm.buildHash(vm.sp-numElements, vm.sp)
+			if err != nil {
+				return err
+			}
+
+			vm.sp = vm.sp - numElements
+
+			if err := vm.push(hash); err != nil {
 				return err
 			}
 

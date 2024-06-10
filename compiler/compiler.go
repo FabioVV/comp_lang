@@ -5,6 +5,7 @@ import (
 	ast "github/FabioVV/comp_lang/ast"
 	"github/FabioVV/comp_lang/code"
 	object "github/FabioVV/comp_lang/object"
+	"sort"
 )
 
 type EmittedInstruction struct {
@@ -270,6 +271,38 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.StringLiteral:
 		str := &object.String{Value: node.Value}
 		c.emitInstruction(code.Opconstant, c.addConstant(str))
+
+	case *ast.ArrayLiteral:
+		for _, el := range node.Elements {
+			if err := c.Compile(el); err != nil {
+				return err
+			}
+		}
+
+		c.emitInstruction(code.OpArray, len(node.Elements))
+
+	case *ast.HashLiteral:
+		keys := []ast.Expression{}
+
+		for k := range node.Pairs {
+			keys = append(keys, k)
+		}
+
+		sort.Slice(keys, func(i, j int) bool {
+			return keys[i].String() < keys[i].String()
+		})
+
+		for _, k := range keys {
+			if err := c.Compile(k); err != nil {
+				return err
+			}
+
+			if err := c.Compile(node.Pairs[k]); err != nil {
+				return err
+			}
+		}
+
+		c.emitInstruction(code.OpHash, len(node.Pairs))
 
 	case *ast.Boolean:
 		if node.Value {

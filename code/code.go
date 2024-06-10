@@ -38,12 +38,14 @@ const (
 	OpJumpNotTruthy
 	OpJump
 
-	//Null
 	OpNull
 
 	// Value binding to names A.K.A variables
 	OpGetGlobal
 	OpSetGlobal
+
+	OpArray
+	OpHash
 )
 
 type Definition struct {
@@ -86,6 +88,8 @@ var defs = map[Opcode]*Definition{
 	OpNull:          {"OpNull", []int{}},
 	OpGetGlobal:     {"OpSetGlobal", []int{2}},
 	OpSetGlobal:     {"OpSetGlobal", []int{2}},
+	OpArray:         {"OpArray", []int{2}},
+	OpHash:          {"OpHash", []int{2}},
 }
 
 func LookupOp(op byte) (*Definition, error) {
