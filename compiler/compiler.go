@@ -304,6 +304,18 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		c.emitInstruction(code.OpHash, len(node.Pairs))
 
+	case *ast.IndexExpression:
+
+		if err := c.Compile(node.Left); err != nil {
+			return err
+		}
+
+		if err := c.Compile(node.Index); err != nil {
+			return err
+		}
+
+		c.emitInstruction(code.OpIndex)
+
 	case *ast.Boolean:
 		if node.Value {
 			c.emitInstruction(code.OpTrue)

@@ -254,6 +254,48 @@ func (vm *VM) buildHash(startIndex int, endIndex int) (Object.Object, error) {
 	return &Object.Hash{Pairs: hashedPairs}, nil
 }
 
+func (vm *VM) execArrayIndex(left Object.Object, index Object.Object) error {
+	array := left.(*Object.Array)
+	i := index.(*Object.Integer).Value
+
+	max := int64(len(array.Elements) - 1)
+
+	if i < 0 || i > max {
+		return vm.push(Null)
+	}
+
+	return vm.push(array.Elements[i])
+}
+
+func (vm *VM) execHashIndex(left Object.Object, index Object.Object) error {
+	hash := left.(*Object.Hash)
+
+	key, ok := index.(Object.Hashable)
+	if !ok {
+		return fmt.Errorf("unusable as hash key : %s", index.Type())
+	}
+
+	pair, ok := hash.Pairs[key.HashKey()]
+	if !ok {
+		return vm.push(Null)
+	}
+
+	return vm.push(pair.Value)
+}
+
+func (vm *VM) execIndexExpression(left Object.Object, index Object.Object) error {
+	switch {
+	case left.Type() == Object.ARRAY_OBJ && index.Type() == Object.INTEGER_OBJ:
+		return vm.execArrayIndex(left, index)
+
+	case left.Type() == Object.HASH_OBJ:
+		return vm.execHashIndex(left, index)
+
+	default:
+		return fmt.Errorf("index operator not supported : %s", left.Type())
+	}
+}
+
 // Turns on momo's virtual machine
 func (vm *VM) Run() error {
 
@@ -372,6 +414,13 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.OpIndex:
+			index := vm.pop() // Removes value from the top of the stack
+			left := vm.pop()  // Removes the value that has become the top (before it was the the value just before it) -- 1+(what is this explanation)2+(what is happening)
+
+			if err := vm.execIndexExpression(left, index); err != nil {
+				return err
+			}
 		}
 	}
 

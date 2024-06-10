@@ -8,6 +8,10 @@ import (
 
 type Instructions []byte
 type Opcode byte
+type Definition struct {
+	Name          string
+	OperandWidths []int
+}
 
 const (
 	Opconstant Opcode = iota
@@ -46,12 +50,8 @@ const (
 
 	OpArray
 	OpHash
+	OpIndex
 )
-
-type Definition struct {
-	Name          string
-	OperandWidths []int
-}
 
 /*
 The new opcode is called OpAdd and tells the VM to pop the two topmost elements off the
@@ -90,6 +90,7 @@ var defs = map[Opcode]*Definition{
 	OpSetGlobal:     {"OpSetGlobal", []int{2}},
 	OpArray:         {"OpArray", []int{2}},
 	OpHash:          {"OpHash", []int{2}},
+	OpIndex:         {"OpIndex", []int{}},
 }
 
 func LookupOp(op byte) (*Definition, error) {
