@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	Ast "github/FabioVV/comp_lang/ast"
+	"github/FabioVV/comp_lang/code"
 	Token "github/FabioVV/comp_lang/token"
 	"hash/fnv"
 	"strings"
@@ -14,28 +15,33 @@ type BuiltInFunction func(Token Token.Token, args ...Object) Object
 type LibFunction interface{}
 
 const (
-	INTEGER_OBJ      = "INTEGER"
-	FLOAT_OBJ        = "FLOAT"
-	STRING_OBJ       = "STRING"
-	ARRAY_OBJ        = "ARRAY"
-	HASH_OBJ         = "HASH"
-	BOOLEAN_OBJ      = "BOOLEAN"
-	NULL_OBJ         = "NULL"
-	RETURN_VALUE_OBJ = "RETURN_VALUE"
-	BREAK_OBJ        = "BREAK"
-	CONTINUE_OBJ     = "CONTINUE"
-	ERROR_OBJ        = "ERROR"
-	WARNING_OBJ      = "WARNING"
-	TYPE_OBJ         = "TYPE_OBJ"
-	TYPE_DEF_OBJ     = "TYPEDEF"
-	FUNCTION_OBJ     = "FUNCTION"
-	BUILTIN_OBJ      = "BUILTIN"
-	LIB_OBJ          = "LIB_FN"
+	INTEGER_OBJ           = "INTEGER"
+	FLOAT_OBJ             = "FLOAT"
+	STRING_OBJ            = "STRING"
+	ARRAY_OBJ             = "ARRAY"
+	HASH_OBJ              = "HASH"
+	BOOLEAN_OBJ           = "BOOLEAN"
+	NULL_OBJ              = "NULL"
+	RETURN_VALUE_OBJ      = "RETURN_VALUE"
+	BREAK_OBJ             = "BREAK"
+	CONTINUE_OBJ          = "CONTINUE"
+	ERROR_OBJ             = "ERROR"
+	WARNING_OBJ           = "WARNING"
+	TYPE_OBJ              = "TYPE_OBJ"
+	TYPE_DEF_OBJ          = "TYPEDEF"
+	FUNCTION_OBJ          = "FUNCTION"
+	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION_OBJ"
+	BUILTIN_OBJ           = "BUILTIN"
+	LIB_OBJ               = "LIB_FN"
 )
 
 type Object interface {
 	Type() ObjectType
 	Inspect() string
+}
+
+type CompiledFunction struct {
+	Instructions code.Instructions
 }
 
 type Error struct {
@@ -142,6 +148,11 @@ different values, an event called a hash collision. Chances that we experience i
 should be noted that there are well-known techniques such as “separate chaining” and “open
 addressing” to work around the problem. Implementing one of these mitigations is outside of
 this book’s scope, but certainly a nice exercise for the curious reader.*/
+
+func (cf *CompiledFunction) Type() ObjectType { return COMPILED_FUNCTION_OBJ }
+func (cf *CompiledFunction) Inspect() string {
+	return fmt.Sprintf("Compiled fn [%p]", cf)
+}
 
 func (b *Boolean) HashKey() HashKey {
 	var value uint64

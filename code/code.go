@@ -51,6 +51,11 @@ const (
 	OpArray
 	OpHash
 	OpIndex
+
+	// Fn invoking :>> random_function()
+	OpCall
+	OpReturnValue
+	OpReturn
 )
 
 /*
@@ -91,6 +96,9 @@ var defs = map[Opcode]*Definition{
 	OpArray:         {"OpArray", []int{2}},
 	OpHash:          {"OpHash", []int{2}},
 	OpIndex:         {"OpIndex", []int{}},
+	OpCall:          {"OpCall", []int{}},
+	OpReturnValue:   {"OpReturnValue", []int{}},
+	OpReturn:        {"OpReturn", []int{}},
 }
 
 func LookupOp(op byte) (*Definition, error) {
