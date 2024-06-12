@@ -97,8 +97,12 @@ func (c *Compiler) emitInstruction(op code.Opcode, operands ...int) int {
 	return pos
 }
 
-func (c *Compiler) lastInstructionIsPop() bool {
-	return c.scopes[c.scopeIndex].lastInstruction.Opcode == code.OpPop
+func (c *Compiler) lastInstructionIs(op code.Opcode) bool {
+	if len(c.CurrentInstructions()) == 0 {
+		return false
+	}
+
+	return c.scopes[c.scopeIndex].lastInstruction.Opcode == op
 }
 
 func (c *Compiler) removeLastPop() {
@@ -149,6 +153,13 @@ func (c *Compiler) leaveScope() code.Instructions {
 	return instructions
 }
 
+func (c *Compiler) replaceLastPopWithReturn() {
+	lastPos := c.scopes[c.scopeIndex].lastInstruction.Pos
+	c.replaceInstruction(lastPos, code.Make(code.OpReturnValue))
+
+	c.scopes[c.scopeIndex].lastInstruction.Opcode = code.OpReturnValue
+}
+
 func (c *Compiler) Compile(node ast.Node) error {
 	switch node := node.(type) {
 
@@ -160,6 +171,34 @@ func (c *Compiler) Compile(node ast.Node) error {
 				return err
 			}
 		}
+
+	case *ast.ReturnStatement:
+		if err := c.Compile(node.ReturnValue); err != nil {
+			return err
+		}
+
+		c.emitInstruction(code.OpReturnValue)
+
+	case *ast.FunctionLiteral:
+		c.enterScope()
+
+		if err := c.Compile(node.Body); err != nil {
+			return err
+		}
+
+		if c.lastInstructionIs(code.OpPop) {
+			c.replaceLastPopWithReturn()
+		}
+
+		if !c.lastInstructionIs(code.OpReturnValue) {
+			c.emitInstruction(code.OpReturn)
+		}
+
+		instructions := c.leaveScope()
+
+		compiledFunction := &object.CompiledFunction{Instructions: instructions}
+
+		c.emitInstruction(code.Opconstant, c.addConstant(compiledFunction))
 
 	case *ast.VarStatement:
 		err := c.Compile(node.Value)
@@ -284,7 +323,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		if c.lastInstructionIsPop() {
+		if c.lastInstructionIs(code.OpPop) {
 			c.removeLastPop()
 		}
 
@@ -301,7 +340,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 				return err
 			}
 
-			if c.lastInstructionIsPop() {
+			if c.lastInstructionIs(code.OpPop) {
 				c.removeLastPop()
 			}
 
