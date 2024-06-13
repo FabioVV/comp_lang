@@ -594,6 +594,31 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 				tok.Pos.Column = l.Pos.Column
 				tok.Pos.Line = l.Pos.Line
 				tok.Filename = l.Filename
+
+				// Check if it is a literal function or a named function
+				if tok.Type == Token.FUNCTION {
+					peekChar, _ := l.peek()
+
+					if unicode.IsSpace(peekChar) {
+						peekChar, _ = l.peek()
+						l.Backup()
+
+					}
+
+					l.Backup()
+
+					if peekChar == '(' {
+						return l.Pos, tok
+
+					} else if unicode.IsLetter(peekChar) || peekChar == '_' {
+						tok.Type = Token.FUNCTION_STATEMENT
+
+						return l.Pos, tok
+
+					}
+
+				}
+
 				return l.Pos, tok
 
 			} else if unicode.IsDigit(r) || r == '.' || r == 'x' || r == 'X' {
@@ -644,12 +669,15 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 				if strings.ContainsRune(literal, '.') || strings.ContainsRune(literal, 'e') || strings.ContainsRune(literal, 'E') {
 					tok.Type = Token.FLOAT
 					tok.Literal = literal
+
 				} else if strings.ContainsRune(literal, 'x') || strings.ContainsRune(literal, 'X') {
 					tok.Type = Token.INT
 					tok.Literal = literal
+
 				} else {
 					tok.Type = Token.INT
 					tok.Literal = literal
+
 				}
 
 				tok.Pos.Column = l.Pos.Column

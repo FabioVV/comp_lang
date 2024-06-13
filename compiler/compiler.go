@@ -179,6 +179,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		c.emitInstruction(code.OpReturnValue)
 
+	case *ast.CallExpression:
+
+		if err := c.Compile(node.Function); err != nil {
+			return err
+		}
+		c.emitInstruction(code.OpCall)
+
 	case *ast.FunctionLiteral:
 		c.enterScope()
 

@@ -87,19 +87,20 @@ const (
 	RBRACKET = "]"
 
 	// Keywords
-	FUNCTION = "FUNCTION"
-	TYPEDEF  = "TYPEDEF"
-	VAR      = "VAR"
-	TRUE     = "TRUE"
-	FALSE    = "FALSE"
-	IF       = "IF"
-	FOR      = "FOR"
-	LOOP     = "LOOP"
-	ELSE     = "ELSE"
-	RETURN   = "RETURN"
-	BREAK    = "BREAK"
-	CONTINUE = "CONTINUE"
-	LOAD     = "LOAD"
+	FUNCTION           = "FUNCTION"
+	FUNCTION_STATEMENT = "FUNCTION_STATEMENT"
+	TYPEDEF            = "TYPEDEF"
+	VAR                = "VAR"
+	TRUE               = "TRUE"
+	FALSE              = "FALSE"
+	IF                 = "IF"
+	FOR                = "FOR"
+	LOOP               = "LOOP"
+	ELSE               = "ELSE"
+	RETURN             = "RETURN"
+	BREAK              = "BREAK"
+	CONTINUE           = "CONTINUE"
+	LOAD               = "LOAD"
 )
 
 var keywords = map[string]TokenType{

@@ -401,6 +401,7 @@ func (fs *FunctionStatement) String() string {
 	}
 
 	out.WriteString(fs.TokenLiteral())
+	out.WriteString(" ")
 	out.WriteString(fs.Name.Value)
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))

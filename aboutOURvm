@@ -1,0 +1,4 @@
+ the VM’s main loop iterates through the
+vm.instructions slice by incrementing its instruction pointer, ip, and using it as an index to
+fetch the next opcode from vm.instructions. It also reads the operands from the same slice.
+When it comes across a branching instruction, like OpJump, it changes the value of ip manually.

@@ -87,7 +87,7 @@ func Start(in io.Reader, out io.Writer) {
 	fmt.Printf("Feel free to type in commands\n")
 
 	constants := []Object.Object{}
-	globals := make([]Object.Object, vm.GlobalsSize)
+	globals := make([]Object.Object, vm.GLOBALSSIZE)
 	symbolTable := compiler.NewSymbolTable()
 
 	for {

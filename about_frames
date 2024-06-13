@@ -1,0 +1,6 @@
+Frame is short for call frame, or stack frame, and is the name for a data structure that holds
+execution-relevant information. In compiler or interpreter literature this is also sometimes called
+an activation record.
+
+
+Calling convention for fn's

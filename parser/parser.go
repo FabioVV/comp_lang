@@ -215,6 +215,7 @@ func (p *Parser) parseFNStatement() *Ast.FunctionStatement {
 
 	stmt.Body = p.parseBlockStatement()
 
+	fmt.Println(stmt)
 	return stmt
 
 }
@@ -300,7 +301,7 @@ func (p *Parser) parseStatement() Ast.Statement {
 	case Token.VAR:
 		stmt = p.parseVarStatement()
 
-	case Token.FUNCTION:
+	case Token.FUNCTION_STATEMENT:
 		stmt = p.parseFNStatement()
 
 	case Token.RETURN:
@@ -317,19 +318,19 @@ func (p *Parser) parseStatement() Ast.Statement {
 
 	}
 
-	if !p.isSemicolonOptional() {
-		if !p.curTokenIs(Token.SEMICOLON) {
-			msg := newError("Syntax error - Expected semicolon (;) at the end of the statement %s", p.curToken, stmt.String())
-			p.errors = append(p.errors, msg)
+	// if !p.isSemicolonOptional() {
+	// 	if !p.curTokenIs(Token.SEMICOLON) {
+	// 		msg := newError("Syntax error - Expected semicolon (;) at the end of the statement %s", p.curToken, stmt.String())
+	// 		p.errors = append(p.errors, msg)
 
-			return nil
-		}
-	} else {
-		// Optionally skip semicolon after certain tokens where it's unnecessary but not an error
-		if p.peekTokenIs(Token.SEMICOLON) {
-			p.nextToken() // Consume the semicolon without generating an error
-		}
-	}
+	// 		return nil
+	// 	}
+	// } else {
+	// 	// Optionally skip semicolon after certain tokens where it's unnecessary but not an error
+	// 	if p.peekTokenIs(Token.SEMICOLON) {
+	// 		p.nextToken() // Consume the semicolon without generating an error
+	// 	}
+	// }
 
 	return stmt
 }
@@ -667,7 +668,7 @@ func (p *Parser) parseFunctionParameters() []*Ast.Identifier {
 }
 
 func (p *Parser) parseFunctionLiteral() Ast.Expression {
-
+	// here
 	lit := &Ast.FunctionLiteral{Token: p.curToken}
 
 	if !p.expectPeek(Token.LPAREN) {
