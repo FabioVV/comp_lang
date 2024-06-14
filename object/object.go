@@ -34,12 +34,18 @@ const (
 	FUNCTION_OBJ          = "FUNCTION"
 	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION_OBJ"
 	BUILTIN_OBJ           = "BUILTIN"
+	CLOSURE_OBJ           = "CLOSURE"
 	LIB_OBJ               = "LIB_FN"
 )
 
 type Object interface {
 	Type() ObjectType
 	Inspect() string
+}
+
+type Closure struct {
+	Fn   *CompiledFunction
+	Free []*Object
 }
 
 type CompiledFunction struct {
@@ -152,6 +158,11 @@ different values, an event called a hash collision. Chances that we experience i
 should be noted that there are well-known techniques such as “separate chaining” and “open
 addressing” to work around the problem. Implementing one of these mitigations is outside of
 this book’s scope, but certainly a nice exercise for the curious reader.*/
+
+func (c *Closure) Type() ObjectType { return CLOSURE_OBJ }
+func (c *Closure) Inspect() string {
+	return fmt.Sprintf("closure [%p]", c)
+}
 
 func (cf *CompiledFunction) Type() ObjectType { return COMPILED_FUNCTION_OBJ }
 func (cf *CompiledFunction) Inspect() string {

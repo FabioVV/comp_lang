@@ -47,7 +47,8 @@ func (vm *VM) popFrame() *Frame {
 func NewVM(bytecode *compiler.Bytecode) *VM {
 
 	mainFn := &Object.CompiledFunction{Instructions: bytecode.Instructions}
-	mainFrame := NewFrame(mainFn, 0)
+	mainClosure := &Object.Closure{Fn: mainFn}
+	mainFrame := NewFrame(mainClosure, 0)
 
 	frames := make([]*Frame, MAXFRAMES)
 	frames[0] = mainFrame
@@ -535,6 +536,15 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.OpClosure:
+			constIndex := code.ReadUint16(ins[ip+1:])
+
+			_ = code.ReadUint8(ins[ip+1:])
+			vm.currentFrame().ip += 3
+
+			if err := vm.pushClosure(int(constIndex)); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -546,8 +556,8 @@ func (vm *VM) executeCall(numArgs int) error {
 	calee := vm.stack[vm.sp-1-numArgs]
 
 	switch calee := calee.(type) {
-	case *Object.CompiledFunction:
-		return vm.callFuntion(calee, numArgs)
+	case *Object.Closure:
+		return vm.callClosure(calee, numArgs)
 
 	case *Object.Builtin:
 		return vm.callBuiltin(calee, numArgs)
@@ -557,15 +567,15 @@ func (vm *VM) executeCall(numArgs int) error {
 	}
 }
 
-func (vm *VM) callFuntion(fn *Object.CompiledFunction, numArgs int) error {
+func (vm *VM) callClosure(cl *Object.Closure, numArgs int) error {
 
-	if numArgs != fn.NumParameters {
-		return fmt.Errorf("wrong number of arguments : want=%d got=%d", fn.NumParameters, numArgs)
+	if numArgs != cl.Fn.NumParameters {
+		return fmt.Errorf("wrong number of arguments : want=%d got=%d", cl.Fn.NumParameters, numArgs)
 	}
 
-	frame := NewFrame(fn, vm.sp-numArgs)
+	frame := NewFrame(cl, vm.sp-numArgs)
 	vm.pushFrame(frame)
-	vm.sp = frame.basePointer + fn.NumLocals
+	vm.sp = frame.basePointer + cl.Fn.NumLocals
 
 	return nil
 }
@@ -584,4 +594,15 @@ func (vm *VM) callBuiltin(builtin *Object.Builtin, numArgs int) error {
 	}
 
 	return nil
+}
+
+func (vm *VM) pushClosure(constIndex int) error {
+	constant := vm.constants[constIndex]
+	function, ok := constant.(*Object.CompiledFunction)
+
+	if !ok {
+		return fmt.Errorf("not a function %+v", constant)
+	}
+
+	return vm.push(&Object.Closure{Fn: function})
 }
