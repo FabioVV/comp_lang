@@ -49,6 +49,7 @@ const (
 	OpSetGlobal
 	OpGetLocal
 	OpSetLocal
+	OpGetFree
 
 	OpArray
 	OpHash
@@ -60,6 +61,7 @@ const (
 	OpReturn
 	OpGetBuiltin
 	OpClosure
+	OpCurrentClosure
 )
 
 /*
@@ -79,34 +81,36 @@ and reorder it to emit the greater-than version instead. That way we keep the in
 small, the loop of our VM tighter and learn about the things we can do with compilation
 */
 var defs = map[Opcode]*Definition{
-	OpConstant:      {"OpConstant", []int{2}},
-	OpJump:          {"OpJump", []int{2}},
-	OpJumpNotTruthy: {"OpJumpNotTruthy", []int{2}},
-	OpAdd:           {"OpAdd", []int{}},
-	OpPop:           {"OpPop", []int{}},
-	OpSub:           {"OpSub", []int{}},
-	OpMul:           {"OpMul", []int{}},
-	OpDiv:           {"OpDiv", []int{}},
-	OpTrue:          {"OpTrue", []int{}},
-	OpFalse:         {"OpFalse", []int{}},
-	OpEqual:         {"OpEqual", []int{}},
-	OpNotEqual:      {"OpNotEqual", []int{}},
-	OpGreaterThan:   {"OpGreaterThan", []int{}},
-	OpMinus:         {"OpMinus", []int{}},
-	OpBang:          {"OpBang", []int{}},
-	OpNull:          {"OpNull", []int{}},
-	OpGetGlobal:     {"OpGetGlobal", []int{2}},
-	OpSetGlobal:     {"OpSetGlobal", []int{2}},
-	OpGetLocal:      {"OpGetLocal", []int{1}},
-	OpSetLocal:      {"OpSetLocal", []int{1}},
-	OpArray:         {"OpArray", []int{2}},
-	OpHash:          {"OpHash", []int{2}},
-	OpIndex:         {"OpIndex", []int{}},
-	OpCall:          {"OpCall", []int{1}},
-	OpReturnValue:   {"OpReturnValue", []int{}},
-	OpReturn:        {"OpReturn", []int{}},
-	OpGetBuiltin:    {"OpGetBuiltin", []int{1}},
-	OpClosure:       {"OpClosure", []int{2, 1}},
+	OpConstant:       {"OpConstant", []int{2}},
+	OpJump:           {"OpJump", []int{2}},
+	OpJumpNotTruthy:  {"OpJumpNotTruthy", []int{2}},
+	OpAdd:            {"OpAdd", []int{}},
+	OpPop:            {"OpPop", []int{}},
+	OpSub:            {"OpSub", []int{}},
+	OpMul:            {"OpMul", []int{}},
+	OpDiv:            {"OpDiv", []int{}},
+	OpTrue:           {"OpTrue", []int{}},
+	OpFalse:          {"OpFalse", []int{}},
+	OpEqual:          {"OpEqual", []int{}},
+	OpNotEqual:       {"OpNotEqual", []int{}},
+	OpGreaterThan:    {"OpGreaterThan", []int{}},
+	OpMinus:          {"OpMinus", []int{}},
+	OpBang:           {"OpBang", []int{}},
+	OpNull:           {"OpNull", []int{}},
+	OpGetGlobal:      {"OpGetGlobal", []int{2}},
+	OpSetGlobal:      {"OpSetGlobal", []int{2}},
+	OpGetLocal:       {"OpGetLocal", []int{1}},
+	OpSetLocal:       {"OpSetLocal", []int{1}},
+	OpArray:          {"OpArray", []int{2}},
+	OpHash:           {"OpHash", []int{2}},
+	OpIndex:          {"OpIndex", []int{}},
+	OpCall:           {"OpCall", []int{1}},
+	OpReturnValue:    {"OpReturnValue", []int{}},
+	OpReturn:         {"OpReturn", []int{}},
+	OpGetBuiltin:     {"OpGetBuiltin", []int{1}},
+	OpClosure:        {"OpClosure", []int{2, 1}},
+	OpGetFree:        {"OpGetFree", []int{1}},
+	OpCurrentClosure: {"OpCurrentClosure", []int{}},
 }
 
 func LookupOp(op byte) (*Definition, error) {

@@ -45,7 +45,7 @@ type Object interface {
 
 type Closure struct {
 	Fn   *CompiledFunction
-	Free []*Object
+	Free []Object
 }
 
 type CompiledFunction struct {

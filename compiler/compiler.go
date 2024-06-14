@@ -39,10 +39,10 @@ func (c *Compiler) loadSymbol(s Symbol) {
 		c.emitInstruction(code.OpGetGlobal, s.Index)
 	case LOCALSCOPE:
 		c.emitInstruction(code.OpGetLocal, s.Index)
-
 	case BUILTINSCOPE:
 		c.emitInstruction(code.OpGetBuiltin, s.Index)
-
+	case FREESCOPE:
+		c.emitInstruction(code.OpGetFree, s.Index)
 	}
 }
 
@@ -210,12 +210,14 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.VarStatement:
+
+		symbol := c.symbolTable.Define(node.Name.Value)
+
 		err := c.Compile(node.Value)
 		if err != nil {
 			return err
 		}
 
-		symbol := c.symbolTable.Define(node.Name.Value)
 		if symbol.Scope == GLOBALSCOPE {
 			c.emitInstruction(code.OpSetGlobal, symbol.Index)
 		} else {
@@ -298,8 +300,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emitInstruction(code.OpReturn)
 		}
 
+		freeSymbols := c.symbolTable.FreeSymbols
 		numLocals := c.symbolTable.numDefinitions
 		instructions := c.leaveScope()
+
+		for _, s := range freeSymbols {
+			c.loadSymbol(s)
+		}
 
 		compiledFn := &object.CompiledFunction{
 			Instructions:  instructions,
@@ -308,7 +315,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		fnIndex := c.addConstant(compiledFn)
-		c.emitInstruction(code.OpClosure, fnIndex, 0)
+		c.emitInstruction(code.OpClosure, fnIndex, len(freeSymbols))
 
 	case *ast.ReturnStatement:
 		err := c.Compile(node.ReturnValue)
