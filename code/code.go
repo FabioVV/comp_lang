@@ -14,7 +14,7 @@ type Definition struct {
 }
 
 const (
-	Opconstant Opcode = iota
+	OpConstant Opcode = iota
 	OpAdd
 	// pop the topmost element off the stack
 	OpPop
@@ -47,6 +47,8 @@ const (
 	// Value binding to names A.K.A variables
 	OpGetGlobal
 	OpSetGlobal
+	OpGetLocal
+	OpSetLocal
 
 	OpArray
 	OpHash
@@ -75,7 +77,7 @@ and reorder it to emit the greater-than version instead. That way we keep the in
 small, the loop of our VM tighter and learn about the things we can do with compilation
 */
 var defs = map[Opcode]*Definition{
-	Opconstant:      {"Opconstant", []int{2}},
+	OpConstant:      {"OpConstant", []int{2}},
 	OpJump:          {"OpJump", []int{2}},
 	OpJumpNotTruthy: {"OpJumpNotTruthy", []int{2}},
 	OpAdd:           {"OpAdd", []int{}},
@@ -93,10 +95,12 @@ var defs = map[Opcode]*Definition{
 	OpNull:          {"OpNull", []int{}},
 	OpGetGlobal:     {"OpGetGlobal", []int{2}},
 	OpSetGlobal:     {"OpSetGlobal", []int{2}},
+	OpGetLocal:      {"OpGetLocal", []int{1}},
+	OpSetLocal:      {"OpSetLocal", []int{1}},
 	OpArray:         {"OpArray", []int{2}},
 	OpHash:          {"OpHash", []int{2}},
 	OpIndex:         {"OpIndex", []int{}},
-	OpCall:          {"OpCall", []int{}},
+	OpCall:          {"OpCall", []int{1}},
 	OpReturnValue:   {"OpReturnValue", []int{}},
 	OpReturn:        {"OpReturn", []int{}},
 }
@@ -115,6 +119,9 @@ func LookupOp(op byte) (*Definition, error) {
 func ReadUint16(ins Instructions) uint16 {
 	return binary.BigEndian.Uint16(ins)
 }
+func ReadUint8(ins Instructions) uint8 {
+	return uint8(ins[0])
+}
 
 func ReadOperands(def *Definition, ins Instructions) ([]int, int) {
 	operands := make([]int, len(def.OperandWidths))
@@ -124,6 +131,8 @@ func ReadOperands(def *Definition, ins Instructions) ([]int, int) {
 		switch width {
 		case 2:
 			operands[i] = int(ReadUint16(ins[offset:]))
+		case 1:
+			operands[i] = int(ReadUint8(ins[offset:]))
 		}
 
 		offset += width

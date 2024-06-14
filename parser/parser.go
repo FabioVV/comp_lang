@@ -215,7 +215,6 @@ func (p *Parser) parseFNStatement() *Ast.FunctionStatement {
 
 	stmt.Body = p.parseBlockStatement()
 
-	fmt.Println(stmt)
 	return stmt
 
 }

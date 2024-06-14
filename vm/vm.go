@@ -47,7 +47,7 @@ func (vm *VM) popFrame() *Frame {
 func NewVM(bytecode *compiler.Bytecode) *VM {
 
 	mainFn := &Object.CompiledFunction{Instructions: bytecode.Instructions}
-	mainFrame := NewFrame(mainFn)
+	mainFrame := NewFrame(mainFn, 0)
 
 	frames := make([]*Frame, MAXFRAMES)
 	frames[0] = mainFrame
@@ -361,7 +361,7 @@ func (vm *VM) Run() error {
 		op = code.Opcode(ins[ip])
 
 		switch op {
-		case code.Opconstant:
+		case code.OpConstant:
 			/*
 				After decoding the operands, we must be careful to increment ip by the correct amount – the
 				number of bytes we read to decode the operands. The result is that the next iteration of the
@@ -434,12 +434,30 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+		case code.OpGetLocal:
+			localIndex := code.ReadUint8(ins[ip+1:])
+			vm.currentFrame().ip += 1
 
+			frame := vm.currentFrame()
+
+			err := vm.push(vm.stack[frame.basePointer+int(localIndex)])
+
+			if err != nil {
+				return err
+			}
 		case code.OpSetGlobal:
 			globalIndex := code.ReadUint16(ins[ip+1:])
 			vm.currentFrame().ip += 2
 
 			vm.globals[globalIndex] = vm.pop()
+
+		case code.OpSetLocal:
+			localIndex := code.ReadUint8(ins[ip+1:])
+			vm.currentFrame().ip += 1
+
+			frame := vm.currentFrame()
+
+			vm.stack[frame.basePointer+int(localIndex)] = vm.pop()
 
 		case code.OpNull:
 			err := vm.push(Null)
@@ -482,8 +500,8 @@ func (vm *VM) Run() error {
 			}
 
 		case code.OpReturn:
-			vm.popFrame()
-			vm.pop()
+			frame := vm.popFrame()
+			vm.sp = frame.basePointer + 1
 
 			if err := vm.push(Null); err != nil {
 				return err
@@ -492,24 +510,42 @@ func (vm *VM) Run() error {
 		case code.OpReturnValue:
 			returnValue := vm.pop()
 
-			vm.popFrame()
-			vm.pop()
+			frame := vm.popFrame()
+			vm.sp = frame.basePointer - 1
 
 			if err := vm.push(returnValue); err != nil {
 				return err
 			}
 
 		case code.OpCall:
-			fn, ok := vm.stack[vm.sp-1].(*Object.CompiledFunction)
-			if !ok {
-				return fmt.Errorf("calling non function")
+			numArgs := code.ReadUint8(ins[ip+1:])
+			vm.currentFrame().ip += 1
+
+			if err := vm.callFuntion(int(numArgs)); err != nil {
+				return err
 			}
 
-			frame := NewFrame(fn)
-			vm.pushFrame(frame)
 		}
 	}
 
 	return nil
 
+}
+
+func (vm *VM) callFuntion(numArgs int) error {
+
+	fn, ok := vm.stack[vm.sp-1-numArgs].(*Object.CompiledFunction)
+	if !ok {
+		return fmt.Errorf("calling non function")
+	}
+
+	if numArgs != fn.NumParameters {
+		return fmt.Errorf("Wrong number of arguments : want=%d got=%d", fn.NumParameters, numArgs)
+	}
+
+	frame := NewFrame(fn, vm.sp-numArgs)
+	vm.pushFrame(frame)
+	vm.sp = frame.basePointer + fn.NumLocals
+
+	return nil
 }

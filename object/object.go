@@ -41,7 +41,9 @@ type Object interface {
 }
 
 type CompiledFunction struct {
-	Instructions code.Instructions
+	Instructions  code.Instructions
+	NumLocals     int
+	NumParameters int
 }
 
 type Error struct {
