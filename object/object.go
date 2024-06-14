@@ -11,7 +11,9 @@ import (
 )
 
 type ObjectType string
-type BuiltInFunction func(Token Token.Token, args ...Object) Object
+
+// type BuiltInFunction func(Token Token.Token, args ...Object) Object
+type BuiltInFunction func(args ...Object) Object
 type LibFunction interface{}
 
 const (
@@ -345,6 +347,24 @@ func (e *Error) Inspect() string {
 
 }
 func (e *Error) Type() ObjectType { return ERROR_OBJ }
+
+func NewError(format string, token Token.Token, a ...interface{}) *Error {
+	return &Error{
+		Message:  fmt.Sprintf(format, a...),
+		Filename: token.Filename,
+		Line:     token.Pos.Line,
+		Column:   token.Pos.Column,
+	}
+}
+
+func NewWarning(format string, token Token.Token, a ...interface{}) *Warning {
+	return &Warning{
+		Message:  fmt.Sprintf(format, a...),
+		Filename: token.Filename,
+		Line:     token.Pos.Line,
+		Column:   token.Pos.Column,
+	}
+}
 
 /*
 As you can see, object.Error is really, really simple. It only wraps a string that serves as error

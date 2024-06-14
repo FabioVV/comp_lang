@@ -90,6 +90,10 @@ func Start(in io.Reader, out io.Writer) {
 	globals := make([]Object.Object, vm.GLOBALSSIZE)
 	symbolTable := compiler.NewSymbolTable()
 
+	for i, v := range Object.Builtins {
+		symbolTable.DefineBuiltin(v.Name, i)
+	}
+
 	for {
 		fmt.Fprintf(out, PROMPT)
 		scanned := scanner.Scan()

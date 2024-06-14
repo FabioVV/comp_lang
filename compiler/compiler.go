@@ -33,6 +33,19 @@ type Compiler struct {
 	scopeIndex int
 }
 
+func (c *Compiler) loadSymbol(s Symbol) {
+	switch s.Scope {
+	case GLOBALSCOPE:
+		c.emitInstruction(code.OpGetGlobal, s.Index)
+	case LOCALSCOPE:
+		c.emitInstruction(code.OpGetLocal, s.Index)
+
+	case BUILTINSCOPE:
+		c.emitInstruction(code.OpGetBuiltin, s.Index)
+
+	}
+}
+
 func New() *Compiler {
 	mainScope := CompilationScope{
 		instructions:        code.Instructions{},
@@ -40,9 +53,15 @@ func New() *Compiler {
 		previousInstruction: EmittedInstruction{},
 	}
 
+	symbolTable := NewSymbolTable()
+
+	for i, v := range object.Builtins {
+		symbolTable.DefineBuiltin(v.Name, i)
+	}
+
 	return &Compiler{
 		constants:   []object.Object{},
-		symbolTable: NewSymbolTable(),
+		symbolTable: symbolTable,
 		scopes:      []CompilationScope{mainScope},
 		scopeIndex:  0,
 	}
@@ -209,11 +228,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("undefined variable %s", node.Value)
 		}
 
-		if symbol.Scope == GLOBALSCOPE {
-			c.emitInstruction(code.OpGetGlobal, symbol.Index)
-		} else {
-			c.emitInstruction(code.OpGetLocal, symbol.Index)
-		}
+		c.loadSymbol(symbol)
 
 	case *ast.StringLiteral:
 		str := &object.String{Value: node.Value}
