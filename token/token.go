@@ -1,7 +1,5 @@
 package Token
 
-import h "github/FabioVV/comp_lang/syshelpers"
-
 /*
 We defined the TokenType type to be a string. That allows us to use many different values
 as TokenTypes, which in turn allows us to distinguish between different types of tokens. Using
@@ -10,9 +8,14 @@ functions: we can just print a string.
 */
 type TokenType string
 
+type Position struct {
+	Line   int
+	Column int
+}
+
 type Token struct {
 	Type     TokenType
-	Pos      h.Position
+	Pos      Position
 	Filename string
 	Literal  string
 }

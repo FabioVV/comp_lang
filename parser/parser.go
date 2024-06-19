@@ -5,7 +5,6 @@ import (
 	Ast "github/FabioVV/comp_lang/ast"
 	Lexer "github/FabioVV/comp_lang/lexer"
 	Object "github/FabioVV/comp_lang/object"
-	h "github/FabioVV/comp_lang/syshelpers"
 	Token "github/FabioVV/comp_lang/token"
 	"strconv"
 )
@@ -53,7 +52,7 @@ type Parser struct {
 	curToken  Token.Token
 	peekToken Token.Token
 
-	pos h.Position
+	pos Token.Position
 
 	prefixParseFNS map[Token.TokenType]prefixParseFN
 	infixParseFNS  map[Token.TokenType]infixParseFN

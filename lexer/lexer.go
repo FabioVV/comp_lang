@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	Object "github/FabioVV/comp_lang/object"
-	h "github/FabioVV/comp_lang/syshelpers"
 	Token "github/FabioVV/comp_lang/token"
 	"io"
 	"strings"
@@ -15,16 +14,16 @@ import (
 type Lexer struct {
 	Filename string
 	Input    *bufio.Reader
-	Pos      h.Position
+	Pos      Token.Position
 	errors   []*Object.Error
 }
 
 // Creates our lexer. Initializes the line and column position at 1, our input as a *bufio.Reader and filename
 func New(reader io.Reader, Filename string) *Lexer {
-	return &Lexer{Input: bufio.NewReader(reader), Pos: h.Position{Line: 1, Column: 1}, Filename: Filename}
+	return &Lexer{Input: bufio.NewReader(reader), Pos: Token.Position{Line: 1, Column: 1}, Filename: Filename}
 }
 
-func newLexerError(format string, pos h.Position, filename string, a ...interface{}) *Object.Error {
+func newLexerError(format string, pos Token.Position, filename string, a ...interface{}) *Object.Error {
 	return &Object.Error{
 		Message:  fmt.Sprintf(format, a...),
 		Filename: filename,
@@ -285,10 +284,10 @@ func (l *Lexer) isAlphanumeric() (*Object.Error, bool) {
 
 // Returns a new Token
 func newToken(tokenType Token.TokenType, Filename string, Line int, Column int, ch rune) Token.Token {
-	return Token.Token{Type: tokenType, Pos: h.Position{Line: Line, Column: Column}, Filename: Filename, Literal: string(ch)}
+	return Token.Token{Type: tokenType, Pos: Token.Position{Line: Line, Column: Column}, Filename: Filename, Literal: string(ch)}
 }
 
-func (l *Lexer) NextToken() (h.Position, Token.Token) {
+func (l *Lexer) NextToken() (Token.Position, Token.Token) {
 	var tok Token.Token
 
 	l.skipWhitespace()
@@ -324,7 +323,7 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 					// I just assume its #load
 					if token_name := l.acceptRun("load"); token_name == "load" {
 
-						tok = Token.Token{Type: Token.LOAD, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: token_name}
+						tok = Token.Token{Type: Token.LOAD, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: token_name}
 
 					}
 				}
@@ -345,7 +344,7 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 			if peekChar == '=' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.EQ, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.EQ, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else {
 				l.Backup()
@@ -363,7 +362,7 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 			if peekChar == '=' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.NOT_EQ, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.NOT_EQ, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else {
 				l.Backup()
@@ -381,7 +380,7 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 			if peekChar == '/' {
 				literal, _ := l.readComment()
-				tok = Token.Token{Type: Token.COMMENT, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.COMMENT, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else if peekChar == '*' {
 				literal, err := l.readMultiLineComment()
@@ -391,11 +390,11 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 					break
 				}
 
-				tok = Token.Token{Type: Token.MULTILINE_COMMENT, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.MULTILINE_COMMENT, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else if peekChar == '=' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.DIV_ASSIGN, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.DIV_ASSIGN, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else {
 				l.Backup()
@@ -413,12 +412,12 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 			if peekChar == '=' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.PLUS_ASSIGN, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.PLUS_ASSIGN, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else if peekChar == '+' {
 
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.INC, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.INC, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else {
 				l.Backup()
@@ -436,11 +435,11 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 			if peekChar == '=' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.MINUS_ASSIGN, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.MINUS_ASSIGN, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else if peekChar == '-' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.DEC, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.DEC, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else {
 				l.Backup()
@@ -458,7 +457,7 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 			if peekChar == '=' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.MULT_ASSIGN, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.MULT_ASSIGN, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else {
 				l.Backup()
@@ -480,7 +479,7 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 			if peekChar == '=' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.LT_OR_EQ, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.LT_OR_EQ, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else {
 				l.Backup()
@@ -498,7 +497,7 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 			if peekChar == '=' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.GT_OR_EQ, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.GT_OR_EQ, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else {
 				l.Backup()
@@ -544,11 +543,11 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 
 			if peekChar == '|' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.OR, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.OR, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else if peekChar == '=' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.OR_ASSIGN, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.OR_ASSIGN, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else {
 				l.Backup()
@@ -559,11 +558,11 @@ func (l *Lexer) NextToken() (h.Position, Token.Token) {
 			peekChar, _ := l.peek()
 			if peekChar == '&' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.AND, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.AND, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else if peekChar == '=' {
 				literal := string(r) + string(peekChar)
-				tok = Token.Token{Type: Token.AND_ASSIGN, Pos: h.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
+				tok = Token.Token{Type: Token.AND_ASSIGN, Pos: Token.Position{Line: l.Pos.Line, Column: l.Pos.Column}, Filename: l.Filename, Literal: literal}
 
 			} else {
 				l.Backup()
