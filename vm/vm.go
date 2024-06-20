@@ -127,8 +127,22 @@ func (vm *VM) execBinaryIntOp(op code.Opcode, left Object.Object, right Object.O
 }
 
 func (vm *VM) execBinaryFltOp(op code.Opcode, left Object.Object, right Object.Object) error {
-	leftVal := left.(*Object.Float).Value
-	rightVal := right.(*Object.Float).Value
+	var leftVal float64
+	var rightVal float64
+
+	switch left := left.(type) {
+	case *Object.Float:
+		leftVal = left.Value
+	case *Object.Integer:
+		leftVal = float64(left.Value)
+	}
+
+	switch right := right.(type) {
+	case *Object.Float:
+		rightVal = right.Value
+	case *Object.Integer:
+		rightVal = float64(right.Value)
+	}
 
 	switch op {
 	case code.OpAdd:
@@ -161,6 +175,7 @@ func (vm *VM) execBinaryStrOp(op code.Opcode, left Object.Object, right Object.O
 }
 
 func (vm *VM) execBinaryOp(op code.Opcode) error {
+
 	right := vm.pop()
 	left := vm.pop()
 
@@ -175,6 +190,9 @@ func (vm *VM) execBinaryOp(op code.Opcode) error {
 		return vm.execBinaryStrOp(op, left, right)
 
 	case LeftType == Object.FLOAT_OBJ && rightType == Object.FLOAT_OBJ:
+		return vm.execBinaryFltOp(op, left, right)
+
+	case (LeftType == Object.FLOAT_OBJ && rightType == Object.INTEGER_OBJ) || (LeftType == Object.INTEGER_OBJ && rightType == Object.FLOAT_OBJ):
 		return vm.execBinaryFltOp(op, left, right)
 
 	default:

@@ -115,7 +115,7 @@ func (p *Parser) peekError(t Token.TokenType) {
 }
 
 func (p *Parser) currentError(t Token.TokenType) {
-	msg := newError("expected current to be %s, got %s instead", p.curToken, t, p.peekToken.Type)
+	msg := newError("expected %s, got %s instead", p.curToken, t, p.peekToken.Type)
 
 	p.errors = append(p.errors, msg)
 }
@@ -513,8 +513,6 @@ func (p *Parser) parseInfixExpression(left Ast.Expression) Ast.Expression {
 
 	return expression
 
-	// dot? <exp>.<exp>
-
 }
 
 func (p *Parser) parseBlockStatement() *Ast.BlockStatement {
@@ -524,11 +522,13 @@ func (p *Parser) parseBlockStatement() *Ast.BlockStatement {
 
 	p.nextToken()
 	for !p.curTokenIs(Token.RBRACE) && !p.curTokenIs(Token.EOF) {
+
 		stmt := p.parseStatement()
 
-		if stmt != nil {
-			block.Statements = append(block.Statements, stmt)
-		}
+		// if stmt != nil {
+		// 	block.Statements = append(block.Statements, stmt)
+		// }
+		block.Statements = append(block.Statements, stmt)
 
 		p.nextToken()
 	}
