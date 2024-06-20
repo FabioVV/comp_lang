@@ -130,6 +130,7 @@ type Comment struct {
 
 type FunctionLiteral struct {
 	Token      Token.Token // The 'fn' token
+	Name       string
 	Parameters []*Identifier
 	Body       *BlockStatement
 }
@@ -362,6 +363,10 @@ func (fl *FunctionLiteral) String() string {
 	}
 
 	out.WriteString(fl.TokenLiteral())
+	if fl.Name != "" {
+		out.WriteString(fl.Name)
+
+	}
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))
 	out.WriteString(") ")

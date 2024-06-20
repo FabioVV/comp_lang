@@ -182,6 +182,10 @@ func (p *Parser) parseVarStatement() *Ast.VarStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
+	if fl, ok := stmt.Value.(*Ast.FunctionLiteral); ok {
+		fl.Name = stmt.Name.Value
+	}
+
 	if p.peekTokenIs(Token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -922,7 +926,6 @@ func New(l *Lexer.Lexer) *Parser {
 	p.registerInfix(Token.LBRACKET, p.parseIndexExpression)
 
 	// Read two tokens, so curToken and peekToken are both set
-
 	p.nextToken()
 	p.nextToken()
 

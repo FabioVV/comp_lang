@@ -43,6 +43,8 @@ func (c *Compiler) loadSymbol(s Symbol) {
 		c.emitInstruction(code.OpGetBuiltin, s.Index)
 	case FREESCOPE:
 		c.emitInstruction(code.OpGetFree, s.Index)
+	case FUNCTIONSCOPE:
+		c.emitInstruction(code.OpCurrentClosure)
 	}
 }
 
@@ -283,6 +285,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 	case *ast.FunctionLiteral:
 		c.enterScope()
+
+		if node.Name != "" {
+			c.symbolTable.DefineFunctionName(node.Name)
+		}
 
 		for _, p := range node.Parameters {
 			c.symbolTable.Define(p.Value)

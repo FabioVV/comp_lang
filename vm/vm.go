@@ -555,6 +555,11 @@ func (vm *VM) Run() error {
 			if err := vm.pushClosure(int(constIndex), int(numFree)); err != nil {
 				return err
 			}
+		case code.OpCurrentClosure:
+			current := vm.currentFrame().cl
+			if err := vm.push(current); err != nil {
+				return err
+			}
 
 		}
 	}
