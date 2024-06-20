@@ -5,6 +5,7 @@ import (
 	ast "github/FabioVV/comp_lang/ast"
 	code "github/FabioVV/comp_lang/code"
 	object "github/FabioVV/comp_lang/object"
+	Token "github/FabioVV/comp_lang/token"
 	"sort"
 )
 
@@ -31,6 +32,15 @@ type Compiler struct {
 
 	scopes     []CompilationScope
 	scopeIndex int
+}
+
+func (c *Compiler) newCompilerError(format string, token Token.Token, a ...interface{}) *object.Error {
+	return &object.Error{
+		Message:  fmt.Sprintf(format, a...),
+		Filename: token.Filename,
+		Line:     token.Pos.Line,
+		Column:   token.Pos.Column,
+	}
 }
 
 func (c *Compiler) loadSymbol(s Symbol) {
@@ -76,7 +86,7 @@ func NewWithState(s *SymbolTable, constants []object.Object) *Compiler {
 	return compiler
 }
 
-func (c *Compiler) Compile(node ast.Node) error {
+func (c *Compiler) Compile(node ast.Node) *object.Error {
 	switch node := node.(type) {
 	case *ast.Program:
 		for _, s := range node.Statements {
@@ -134,7 +144,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 		case "!=":
 			c.emitInstruction(code.OpNotEqual)
 		default:
-			return fmt.Errorf("unknown operator %s", node.Operator)
+			return c.newCompilerError("unknown operator %s", node.Token, node.TokenLiteral())
+
 		}
 
 	case *ast.IntegerLiteral:
@@ -164,7 +175,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 		case "-":
 			c.emitInstruction(code.OpMinus)
 		default:
-			return fmt.Errorf("unknown operator %s", node.Operator)
+			return c.newCompilerError("unknown operator %s", node.Token, node.TokenLiteral())
+
 		}
 
 	case *ast.IFexpression:
@@ -233,7 +245,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.Identifier:
 		symbol, ok := c.symbolTable.Resolve(node.Value)
 		if !ok {
-			return fmt.Errorf("undefined variable %s", node.Value)
+			return c.newCompilerError("unknown operator %s", node.Token, node.TokenLiteral())
 		}
 
 		c.loadSymbol(symbol)

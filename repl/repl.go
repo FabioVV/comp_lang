@@ -36,6 +36,11 @@ func printParseErrors(out io.Writer, errors []*Object.Error) {
 	}
 }
 
+func printCompilerError(out io.Writer, _error *Object.Error) {
+	io.WriteString(out, "compilation failed:\n")
+	io.WriteString(out, "\t"+_error.Inspect()+"\n")
+}
+
 func ClearScreen() {
 	var cmd *exec.Cmd
 
@@ -116,10 +121,10 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		comp := compiler.NewWithState(symbolTable, constants)
-		err := comp.Compile(program)
+		err_obj := comp.Compile(program)
 
-		if err != nil {
-			fmt.Fprintf(out, "compilation failed:\n %s\n", err)
+		if err_obj != nil {
+			printCompilerError(os.Stdout, err_obj)
 			continue
 		}
 
@@ -127,10 +132,10 @@ func Start(in io.Reader, out io.Writer) {
 		constants = code.Constants
 
 		machine := vm.NewWithGlobalsStore(code, globals)
-		err = machine.Run()
+		mac_err := machine.Run()
 
-		if err != nil {
-			fmt.Fprintf(out, "executing bytecode failed:\n %s\n", err)
+		if mac_err != nil {
+			fmt.Fprintf(out, "executing bytecode failed:\n %s\n", mac_err)
 			continue
 		}
 

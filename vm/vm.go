@@ -4,30 +4,40 @@ import (
 	"fmt"
 	"github/FabioVV/comp_lang/code"
 	"github/FabioVV/comp_lang/compiler"
-	Object "github/FabioVV/comp_lang/object"
+	object "github/FabioVV/comp_lang/object"
+	token "github/FabioVV/comp_lang/token"
 )
 
 const STACKSIZE int = 2048
 const GLOBALSSIZE int = 65536
 const MAXFRAMES int = 1024
 
-var True = &Object.Boolean{Value: true}
-var False = &Object.Boolean{Value: false}
+var True = &object.Boolean{Value: true}
+var False = &object.Boolean{Value: false}
 
 // var Null = &object.Null{}
-var Null = &Object.NULL
+var Null = &object.NULL
 
 // The momo virtual machine. Hell yeah.
 type VM struct {
-	constants []Object.Object
-	globals   []Object.Object
-	stack     []Object.Object
+	constants []object.Object
+	globals   []object.Object
+	stack     []object.Object
 
 	frames      []*Frame
 	framesIndex int
 
 	sp int // stackpointer. Always points to the next value. Top of stack is stack[sp-1]
 
+}
+
+func (v *VM) newVMError(format string, token token.Token, a ...interface{}) *object.Error {
+	return &object.Error{
+		Message:  fmt.Sprintf(format, a...),
+		Filename: token.Filename,
+		Line:     token.Pos.Line,
+		Column:   token.Pos.Column,
+	}
 }
 
 func (vm *VM) currentFrame() *Frame {
@@ -46,8 +56,8 @@ func (vm *VM) popFrame() *Frame {
 
 func NewVM(bytecode *compiler.Bytecode) *VM {
 
-	mainFn := &Object.CompiledFunction{Instructions: bytecode.Instructions}
-	mainClosure := &Object.Closure{Fn: mainFn}
+	mainFn := &object.CompiledFunction{Instructions: bytecode.Instructions}
+	mainClosure := &object.Closure{Fn: mainFn}
 	mainFrame := NewFrame(mainClosure, 0)
 
 	frames := make([]*Frame, MAXFRAMES)
@@ -55,22 +65,22 @@ func NewVM(bytecode *compiler.Bytecode) *VM {
 
 	return &VM{
 		constants:   bytecode.Constants,
-		stack:       make([]Object.Object, STACKSIZE),
-		globals:     make([]Object.Object, GLOBALSSIZE),
+		stack:       make([]object.Object, STACKSIZE),
+		globals:     make([]object.Object, GLOBALSSIZE),
 		frames:      frames,
 		framesIndex: 1,
 		sp:          0,
 	}
 }
 
-func NewWithGlobalsStore(bytecode *compiler.Bytecode, s []Object.Object) *VM {
+func NewWithGlobalsStore(bytecode *compiler.Bytecode, s []object.Object) *VM {
 	vm := NewVM(bytecode)
 	vm.globals = s
 	return vm
 }
 
 /*
-	func (vm *VM) StackTop() Object.Object {
+	func (vm *VM) StackTop() object.Object {
 		if vm.sp == 0 {
 			return nil
 		}
@@ -78,11 +88,11 @@ func NewWithGlobalsStore(bytecode *compiler.Bytecode, s []Object.Object) *VM {
 	}
 */
 
-func (vm *VM) LastPoppedStackElement() Object.Object {
+func (vm *VM) LastPoppedStackElement() object.Object {
 	return vm.stack[vm.sp]
 }
 
-func (vm *VM) push(obj Object.Object) error {
+func (vm *VM) push(obj object.Object) error {
 	if vm.sp >= STACKSIZE {
 		return fmt.Errorf("stack overflow")
 	}
@@ -98,79 +108,79 @@ We first take the element from the top of the stack, located at vm.sp-1, and put
 side. Then we decrement vm.sp, allowing the location of element that was just popped off being
 overwritten eventually.
 */
-func (vm *VM) pop() Object.Object {
+func (vm *VM) pop() object.Object {
 	obj := vm.stack[vm.sp-1]
 	vm.sp--
 	return obj
 }
 
-func (vm *VM) execBinaryIntOp(op code.Opcode, left Object.Object, right Object.Object) error {
-	leftVal := left.(*Object.Integer).Value
-	rightVal := right.(*Object.Integer).Value
+func (vm *VM) execBinaryIntOp(op code.Opcode, left object.Object, right object.Object) error {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
 
 	switch op {
 	case code.OpAdd:
-		return vm.push(&Object.Integer{Value: leftVal + rightVal})
+		return vm.push(&object.Integer{Value: leftVal + rightVal})
 
 	case code.OpSub:
-		return vm.push(&Object.Integer{Value: leftVal - rightVal})
+		return vm.push(&object.Integer{Value: leftVal - rightVal})
 
 	case code.OpMul:
-		return vm.push(&Object.Integer{Value: leftVal * rightVal})
+		return vm.push(&object.Integer{Value: leftVal * rightVal})
 
 	case code.OpDiv:
-		return vm.push(&Object.Integer{Value: leftVal / rightVal})
+		return vm.push(&object.Integer{Value: leftVal / rightVal})
 
 	default:
 		return fmt.Errorf("unknow integer operator -> %d", op)
 	}
 }
 
-func (vm *VM) execBinaryFltOp(op code.Opcode, left Object.Object, right Object.Object) error {
+func (vm *VM) execBinaryFltOp(op code.Opcode, left object.Object, right object.Object) error {
 	var leftVal float64
 	var rightVal float64
 
 	switch left := left.(type) {
-	case *Object.Float:
+	case *object.Float:
 		leftVal = left.Value
-	case *Object.Integer:
+	case *object.Integer:
 		leftVal = float64(left.Value)
 	}
 
 	switch right := right.(type) {
-	case *Object.Float:
+	case *object.Float:
 		rightVal = right.Value
-	case *Object.Integer:
+	case *object.Integer:
 		rightVal = float64(right.Value)
 	}
 
 	switch op {
 	case code.OpAdd:
-		return vm.push(&Object.Float{Value: leftVal + rightVal})
+		return vm.push(&object.Float{Value: leftVal + rightVal})
 
 	case code.OpSub:
-		return vm.push(&Object.Float{Value: leftVal - rightVal})
+		return vm.push(&object.Float{Value: leftVal - rightVal})
 
 	case code.OpMul:
-		return vm.push(&Object.Float{Value: leftVal * rightVal})
+		return vm.push(&object.Float{Value: leftVal * rightVal})
 
 	case code.OpDiv:
-		return vm.push(&Object.Float{Value: leftVal / rightVal})
+		return vm.push(&object.Float{Value: leftVal / rightVal})
 
 	default:
 		return fmt.Errorf("unknow floating point operator -> %d", op)
 	}
 }
 
-func (vm *VM) execBinaryStrOp(op code.Opcode, left Object.Object, right Object.Object) error {
+func (vm *VM) execBinaryStrOp(op code.Opcode, left object.Object, right object.Object) error {
 	if op != code.OpAdd {
 		return fmt.Errorf("unknow string operator : %d", op)
 	}
 
-	leftValue := left.(*Object.String).Value
-	rightValue := right.(*Object.String).Value
+	leftValue := left.(*object.String).Value
+	rightValue := right.(*object.String).Value
 
-	return vm.push(&Object.String{Value: leftValue + rightValue})
+	return vm.push(&object.String{Value: leftValue + rightValue})
 
 }
 
@@ -183,16 +193,16 @@ func (vm *VM) execBinaryOp(op code.Opcode) error {
 	LeftType := left.Type()
 
 	switch {
-	case LeftType == Object.INTEGER_OBJ && rightType == Object.INTEGER_OBJ:
+	case LeftType == object.INTEGER_OBJ && rightType == object.INTEGER_OBJ:
 		return vm.execBinaryIntOp(op, left, right)
 
-	case LeftType == Object.STRING_OBJ && rightType == Object.STRING_OBJ:
+	case LeftType == object.STRING_OBJ && rightType == object.STRING_OBJ:
 		return vm.execBinaryStrOp(op, left, right)
 
-	case LeftType == Object.FLOAT_OBJ && rightType == Object.FLOAT_OBJ:
+	case LeftType == object.FLOAT_OBJ && rightType == object.FLOAT_OBJ:
 		return vm.execBinaryFltOp(op, left, right)
 
-	case (LeftType == Object.FLOAT_OBJ && rightType == Object.INTEGER_OBJ) || (LeftType == Object.INTEGER_OBJ && rightType == Object.FLOAT_OBJ):
+	case (LeftType == object.FLOAT_OBJ && rightType == object.INTEGER_OBJ) || (LeftType == object.INTEGER_OBJ && rightType == object.FLOAT_OBJ):
 		return vm.execBinaryFltOp(op, left, right)
 
 	default:
@@ -202,16 +212,16 @@ func (vm *VM) execBinaryOp(op code.Opcode) error {
 
 }
 
-func nativeBoolToBooleanObj(input bool) *Object.Boolean {
+func nativeBoolToBooleanObj(input bool) *object.Boolean {
 	if input {
 		return True
 	}
 	return False
 }
 
-func (vm *VM) execIntComparison(op code.Opcode, left Object.Object, right Object.Object) error {
-	leftVal := left.(*Object.Integer).Value
-	rightVal := right.(*Object.Integer).Value
+func (vm *VM) execIntComparison(op code.Opcode, left object.Object, right object.Object) error {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
 
 	switch op {
 	case code.OpEqual:
@@ -230,7 +240,7 @@ func (vm *VM) execComparison(op code.Opcode) error {
 	right := vm.pop()
 	left := vm.pop()
 
-	if left.Type() == Object.INTEGER_OBJ && right.Type() == Object.INTEGER_OBJ {
+	if left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ {
 		return vm.execIntComparison(op, left, right)
 	}
 
@@ -268,21 +278,21 @@ func (vm *VM) execBangOperator() error {
 func (vm *VM) execMinusOperator() error {
 	operand := vm.pop()
 
-	if operand.Type() != Object.INTEGER_OBJ {
+	if operand.Type() != object.INTEGER_OBJ {
 		return fmt.Errorf("unsupported type for negation: %s", operand.Type())
 	}
 
-	val := operand.(*Object.Integer).Value
-	return vm.push(&Object.Integer{Value: -val})
+	val := operand.(*object.Integer).Value
+	return vm.push(&object.Integer{Value: -val})
 
 }
 
-func isTruthy(obj Object.Object) bool {
+func isTruthy(obj object.Object) bool {
 	switch obj := obj.(type) {
-	case *Object.Boolean:
+	case *object.Boolean:
 		return obj.Value
 
-	case *Object.Null:
+	case *object.Null:
 		return false
 
 	default:
@@ -290,27 +300,27 @@ func isTruthy(obj Object.Object) bool {
 	}
 }
 
-func (vm *VM) buildArray(startIndex int, endIndex int) Object.Object {
-	elements := make([]Object.Object, endIndex-startIndex)
+func (vm *VM) buildArray(startIndex int, endIndex int) object.Object {
+	elements := make([]object.Object, endIndex-startIndex)
 
 	for i := startIndex; i < endIndex; i++ {
 		elements[i-startIndex] = vm.stack[i]
 
 	}
 
-	return &Object.Array{Elements: elements}
+	return &object.Array{Elements: elements}
 }
 
-func (vm *VM) buildHash(startIndex int, endIndex int) (Object.Object, error) {
-	hashedPairs := make(map[Object.HashKey]Object.HashPair)
+func (vm *VM) buildHash(startIndex int, endIndex int) (object.Object, error) {
+	hashedPairs := make(map[object.HashKey]object.HashPair)
 
 	for i := startIndex; i < endIndex; i += 2 {
 		key := vm.stack[i]
 		value := vm.stack[i+1]
 
-		pair := Object.HashPair{Key: key, Value: value}
+		pair := object.HashPair{Key: key, Value: value}
 
-		hashKey, ok := key.(Object.Hashable)
+		hashKey, ok := key.(object.Hashable)
 
 		if !ok {
 			return nil, fmt.Errorf("unusable as hash key : %s", key.Type())
@@ -319,12 +329,12 @@ func (vm *VM) buildHash(startIndex int, endIndex int) (Object.Object, error) {
 		hashedPairs[hashKey.HashKey()] = pair
 	}
 
-	return &Object.Hash{Pairs: hashedPairs}, nil
+	return &object.Hash{Pairs: hashedPairs}, nil
 }
 
-func (vm *VM) execArrayIndex(left Object.Object, index Object.Object) error {
-	array := left.(*Object.Array)
-	i := index.(*Object.Integer).Value
+func (vm *VM) execArrayIndex(left object.Object, index object.Object) error {
+	array := left.(*object.Array)
+	i := index.(*object.Integer).Value
 
 	max := int64(len(array.Elements) - 1)
 
@@ -335,10 +345,10 @@ func (vm *VM) execArrayIndex(left Object.Object, index Object.Object) error {
 	return vm.push(array.Elements[i])
 }
 
-func (vm *VM) execHashIndex(left Object.Object, index Object.Object) error {
-	hash := left.(*Object.Hash)
+func (vm *VM) execHashIndex(left object.Object, index object.Object) error {
+	hash := left.(*object.Hash)
 
-	key, ok := index.(Object.Hashable)
+	key, ok := index.(object.Hashable)
 	if !ok {
 		return fmt.Errorf("unusable as hash key : %s", index.Type())
 	}
@@ -351,12 +361,12 @@ func (vm *VM) execHashIndex(left Object.Object, index Object.Object) error {
 	return vm.push(pair.Value)
 }
 
-func (vm *VM) execIndexExpression(left Object.Object, index Object.Object) error {
+func (vm *VM) execIndexExpression(left object.Object, index object.Object) error {
 	switch {
-	case left.Type() == Object.ARRAY_OBJ && index.Type() == Object.INTEGER_OBJ:
+	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
 		return vm.execArrayIndex(left, index)
 
-	case left.Type() == Object.HASH_OBJ:
+	case left.Type() == object.HASH_OBJ:
 		return vm.execHashIndex(left, index)
 
 	default:
@@ -558,7 +568,7 @@ func (vm *VM) Run() error {
 			builtingIndex := code.ReadUint8(ins[ip+1:])
 			vm.currentFrame().ip += 1
 
-			def := Object.Builtins[builtingIndex]
+			def := object.Builtins[builtingIndex]
 
 			if err := vm.push(def.Builtin); err != nil {
 				return err
@@ -590,10 +600,10 @@ func (vm *VM) executeCall(numArgs int) error {
 	calee := vm.stack[vm.sp-1-numArgs]
 
 	switch calee := calee.(type) {
-	case *Object.Closure:
+	case *object.Closure:
 		return vm.callClosure(calee, numArgs)
 
-	case *Object.Builtin:
+	case *object.Builtin:
 		return vm.callBuiltin(calee, numArgs)
 
 	default:
@@ -601,7 +611,7 @@ func (vm *VM) executeCall(numArgs int) error {
 	}
 }
 
-func (vm *VM) callClosure(cl *Object.Closure, numArgs int) error {
+func (vm *VM) callClosure(cl *object.Closure, numArgs int) error {
 
 	if numArgs != cl.Fn.NumParameters {
 		return fmt.Errorf("wrong number of arguments : want=%d got=%d", cl.Fn.NumParameters, numArgs)
@@ -614,7 +624,7 @@ func (vm *VM) callClosure(cl *Object.Closure, numArgs int) error {
 	return nil
 }
 
-func (vm *VM) callBuiltin(builtin *Object.Builtin, numArgs int) error {
+func (vm *VM) callBuiltin(builtin *object.Builtin, numArgs int) error {
 
 	args := vm.stack[vm.sp-numArgs : vm.sp]
 
@@ -632,18 +642,18 @@ func (vm *VM) callBuiltin(builtin *Object.Builtin, numArgs int) error {
 
 func (vm *VM) pushClosure(constIndex int, numFree int) error {
 	constant := vm.constants[constIndex]
-	function, ok := constant.(*Object.CompiledFunction)
+	function, ok := constant.(*object.CompiledFunction)
 
 	if !ok {
 		return fmt.Errorf("not a function %+v", constant)
 	}
 
-	free := make([]Object.Object, numFree)
+	free := make([]object.Object, numFree)
 	for i := 0; i < numFree; i++ {
 		free[i] = vm.stack[vm.sp-numFree+i]
 	}
 
 	vm.sp = vm.sp - numFree
 
-	return vm.push(&Object.Closure{Fn: function, Free: free})
+	return vm.push(&object.Closure{Fn: function, Free: free})
 }

@@ -196,7 +196,7 @@ func (s *String) HashKey() HashKey {
 func (i *Integer) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
 func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
 
-func (i *Float) Inspect() string  { return fmt.Sprintf("%f", i.Value) }
+func (i *Float) Inspect() string  { return fmt.Sprintf("%.1f", i.Value) }
 func (i *Float) Type() ObjectType { return FLOAT_OBJ }
 
 func (s *String) formatEscapeSequence() string {
